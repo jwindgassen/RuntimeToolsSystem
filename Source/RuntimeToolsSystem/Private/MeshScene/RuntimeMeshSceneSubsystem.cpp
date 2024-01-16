@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "RuntimeMeshSceneSubsystem.h"
+#include "MeshScene/RuntimeMeshSceneSubsystem.h"
 #include "GameFramework/GameModeBase.h"
 #include "Materials/Material.h"
 

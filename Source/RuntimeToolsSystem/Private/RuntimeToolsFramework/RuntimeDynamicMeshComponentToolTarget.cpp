@@ -6,7 +6,7 @@
 #include "StaticMeshAttributes.h"
 #include "Materials/Material.h"
 #include "ModelingToolTargetUtil.h"
-#include "RuntimeToolsFrameworkSubsystem.h"  // to emit change transaction
+#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"  // to emit change transaction
 
 
 #define LOCTEXT_NAMESPACE "URuntimeDynamicMeshComponentToolTarget"

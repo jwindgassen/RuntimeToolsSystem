@@ -1,5 +1,5 @@
 
-#include "SceneObjectSelectionInteraction.h"
+#include "Interaction/SceneObjectSelectionInteraction.h"
 #include "MeshScene/RuntimeMeshSceneSubsystem.h"
 
 

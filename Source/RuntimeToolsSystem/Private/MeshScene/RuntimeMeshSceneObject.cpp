@@ -1,5 +1,5 @@
 
-#include "RuntimeMeshSceneObject.h"
+#include "MeshScene/RuntimeMeshSceneObject.h"
 
 #include "DynamicMesh/DynamicMesh3.h"
 #include "DynamicMesh/DynamicMeshAABBTree3.h"

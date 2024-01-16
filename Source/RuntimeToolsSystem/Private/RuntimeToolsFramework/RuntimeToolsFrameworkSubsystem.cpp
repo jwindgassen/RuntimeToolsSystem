@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RuntimeToolsFrameworkSubsystem.h"
+#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
 
 #include "ToolContextInterfaces.h"
-#include "ToolsContextActor.h"
+#include "RuntimeToolsFramework/ToolsContextActor.h"
 #include "MeshScene/RuntimeMeshSceneSubsystem.h"
 #include "GeneratedMesh.h"
 
@@ -16,7 +16,7 @@
 
 #include "ContextObjectStore.h"
 #include "ToolTargetManager.h"
-#include "RuntimeDynamicMeshComponentToolTarget.h"
+#include "RuntimeToolsFramework/RuntimeDynamicMeshComponentToolTarget.h"
 
 #include "Materials/Material.h"
 
@@ -24,7 +24,7 @@
 #include "BaseGizmos/TransformGizmoUtil.h"
 #include "BaseGizmos/GizmoViewContext.h"
 
-#include "RuntimeModelingObjectsCreationAPI.h"
+#include "RuntimeToolsFramework/RuntimeModelingObjectsCreationAPI.h"
 
 
 
