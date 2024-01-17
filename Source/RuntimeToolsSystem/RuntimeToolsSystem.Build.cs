@@ -5,34 +5,31 @@ public class RuntimeToolsSystem : ModuleRules
 	public RuntimeToolsSystem(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		DefaultBuildSettings = BuildSettingsVersion.V4;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+		Type = ModuleType.CPlusPlus;
+		IWYUSupport = IWYUSupport.Full;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { 
-			"Core", 
-			"CoreUObject", 
-			"Engine", 
-			"InputCore",
-			"RenderCore",
+		PublicDependencyModuleNames.AddRange(new []{ 
+			"Core",
+			"CoreUObject",
+			"Engine",
 			"InteractiveToolsFramework",
-			"MeshDescription",
-			"StaticMeshDescription",
-			"GeometryCore",
-			"DynamicMesh",
-			"GeometryFramework",
-			"MeshConversion",
-			"ModelingComponents",
 			"MeshModelingTools",
-			"MeshModelingToolsExp",
-			"RuntimeGeometryUtils"
+			"MeshModelingToolsExp" 
 		});
 
-		 PrivateDependencyModuleNames.AddRange(new string[] { 
-			 "Slate", 
-			 "SlateCore" 
+		 PrivateDependencyModuleNames.AddRange(new []{
+			 "ModelingComponents",
+			 "SlateCore",
+			 "Slate",
+			 "InputCore",
+			 "RenderCore",
+			 "GeometryCore",
+			 "GeometryFramework",
+			 "MeshDescription",
+			 "StaticMeshDescription",
+			 "MeshConversion"
 		 });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 	}
 }

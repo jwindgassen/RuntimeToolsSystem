@@ -23,15 +23,7 @@
 	],
 	"Plugins": [
 		{
-			"Name": "GeometryProcessing",
-			"Enabled": true
-		},
-		{
-			"Name": "MeshModelingToolset",
-			"Enabled": true
-		},
-		{
-			"Name": "ProceduralMeshComponent",
+			"Name": "MeshModelingToolsetExp",
 			"Enabled": true
 		}
 	]

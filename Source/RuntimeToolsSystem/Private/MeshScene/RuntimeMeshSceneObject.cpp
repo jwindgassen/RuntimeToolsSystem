@@ -5,6 +5,7 @@
 #include "DynamicMesh/DynamicMeshAABBTree3.h"
 #include "MeshDescriptionToDynamicMesh.h"
 #include "DynamicMeshToMeshDescription.h"
+#include "MaterialDomain.h"
 
 #include "Materials/Material.h"
 
@@ -29,56 +30,21 @@ URuntimeMeshSceneObject::URuntimeMeshSceneObject()
 void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription)
 {
 	FActorSpawnParameters SpawnInfo;
-	SimpleDynamicMeshActor = TargetWorld->SpawnActor<ADynamicSDMCActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
-
-	// listen for changes
-	SimpleDynamicMeshActor->MeshComponent->OnMeshChanged.AddLambda([this]() { 
-		OnExternalDynamicMeshComponentUpdate(); 
-	});
-
-	GetActor()->SourceType = EDynamicMeshActorSourceType::ExternallyGenerated;
-	GetActor()->CollisionMode = EDynamicMeshActorCollisionMode::ComplexAsSimpleAsync;
+	Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
 
 	UpdateSourceMesh(InitialMeshDescription);
-
-	GetActor()->EditMesh([&](FDynamicMesh3& MeshToEdit)
-	{
-		MeshToEdit = *SourceMesh;
-	});
-
 	UpdateComponentMaterials(false);
 }
 
 void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh)
 {
 	FActorSpawnParameters SpawnInfo;
-	SimpleDynamicMeshActor = TargetWorld->SpawnActor<ADynamicSDMCActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
-
-	// listen for changes
-	SimpleDynamicMeshActor->MeshComponent->OnMeshChanged.AddLambda([this]() {
-		OnExternalDynamicMeshComponentUpdate();
-	});
-
-	GetActor()->SourceType = EDynamicMeshActorSourceType::ExternallyGenerated;
-	GetActor()->CollisionMode = EDynamicMeshActorCollisionMode::ComplexAsSimpleAsync;
+	Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
 
 	*SourceMesh = *InitialMesh;
 	MeshAABBTree->SetMesh(SourceMesh.Get(), true);
 
-	GetActor()->EditMesh([&](FDynamicMesh3& MeshToEdit)
-	{
-		MeshToEdit = *SourceMesh;
-	});
-
 	UpdateComponentMaterials(false);
-}
-
-
-void URuntimeMeshSceneObject::OnExternalDynamicMeshComponentUpdate()
-{
-	const FDynamicMesh3* Mesh = SimpleDynamicMeshActor->MeshComponent->GetMesh();
-	*SourceMesh = *Mesh;
-	MeshAABBTree->SetMesh(SourceMesh.Get(), true);
 }
 
 
@@ -88,14 +54,14 @@ void URuntimeMeshSceneObject::SetTransform(FTransform Transform)
 }
 
 
-ADynamicMeshBaseActor* URuntimeMeshSceneObject::GetActor()
+AActor* URuntimeMeshSceneObject::GetActor()
 {
-	return SimpleDynamicMeshActor;
+	return Actor;
 }
 
 UMeshComponent* URuntimeMeshSceneObject::GetMeshComponent()
 {
-	return (SimpleDynamicMeshActor) ? SimpleDynamicMeshActor->MeshComponent : nullptr;
+	return Actor->FindComponentByClass<UMeshComponent>();
 }
 
 
@@ -138,9 +104,6 @@ void URuntimeMeshSceneObject::SetToHighlightMaterial(UMaterialInterface* Materia
 	{
 		Component->SetMaterial(k, Material);
 	}
-
-	// HACK TO FORCE MATERIAL UPDATE IN SDMC
-	SimpleDynamicMeshActor->MeshComponent->NotifyMeshUpdated();
 }
 
 void URuntimeMeshSceneObject::ClearHighlightMaterial()
@@ -161,12 +124,6 @@ void URuntimeMeshSceneObject::UpdateComponentMaterials(bool bForceRefresh)
 	{
 		UMaterialInterface* SetMaterial = (k < Materials.Num()) ? Materials[k] : DefaultMaterial;
 		Component->SetMaterial(k, SetMaterial);
-	}
-
-	// HACK TO FORCE MATERIAL UPDATE IN SDMC
-	if (bForceRefresh)
-	{
-		SimpleDynamicMeshActor->MeshComponent->NotifyMeshUpdated();
 	}
 }
 

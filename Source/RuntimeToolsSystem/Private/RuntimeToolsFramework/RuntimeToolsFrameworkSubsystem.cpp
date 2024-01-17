@@ -6,7 +6,6 @@
 #include "ToolContextInterfaces.h"
 #include "RuntimeToolsFramework/ToolsContextActor.h"
 #include "MeshScene/RuntimeMeshSceneSubsystem.h"
-#include "GeneratedMesh.h"
 
 #include "Framework/Application/SlateApplication.h"
 #include "Slate/SceneViewport.h"
@@ -15,6 +14,7 @@
 #include "GameFramework/PlayerController.h"
 
 #include "ContextObjectStore.h"
+#include "MaterialDomain.h"
 #include "ToolTargetManager.h"
 #include "RuntimeToolsFramework/RuntimeDynamicMeshComponentToolTarget.h"
 
@@ -722,22 +722,8 @@ TArray<UObject*> URuntimeToolsFrameworkSubsystem::GetActiveToolPropertySets()
 
 URuntimeMeshSceneObject* URuntimeToolsFrameworkSubsystem::ImportMeshSceneObject(const FString ImportPath, bool bFlipOrientation)
 {
-	FString UsePath = ImportPath;
-	if (FPaths::FileExists(UsePath) == false && FPaths::IsRelative(UsePath))
-	{
-		UsePath = FPaths::ProjectContentDir() + ImportPath;
-	}
-
-	UGeneratedMesh* ImportMesh = NewObject<UGeneratedMesh>();
-	if (ImportMesh->ReadMeshFromFile(UsePath, bFlipOrientation) == false)
-	{
-		ImportMesh->AppendSphere(200, 8, 8);
-	}
-
-	URuntimeMeshSceneObject* SceneObject = URuntimeMeshSceneSubsystem::Get()->CreateNewSceneObject();
-	SceneObject->Initialize(TargetWorld, ImportMesh->GetMesh().Get());
-
-	return SceneObject;
+	checkNoEntry();
+	return nullptr;
 }
 
 

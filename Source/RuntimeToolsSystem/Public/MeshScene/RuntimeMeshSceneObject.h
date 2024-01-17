@@ -3,13 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/StaticMeshActor.h"
-#include "Components/PrimitiveComponent.h"
-#include "Templates/PimplPtr.h"
+#include "Components/MeshComponent.h"
 #include "DynamicMesh/DynamicMesh3.h"
 #include "DynamicMesh/DynamicMeshAABBTree3.h"
-#include "DynamicPMCActor.h"
-#include "DynamicSDMCActor.h"
 #include "RuntimeMeshSceneObject.generated.h"
 
 struct FMeshDescription;
@@ -43,7 +39,7 @@ public:
 	void SetTransform(FTransform Transform);
 
 	// get the Actor that represents this SceneObject
-	ADynamicMeshBaseActor* GetActor();
+	AActor* GetActor();
 
 	// get the mesh component that represents this SceneObject
 	UMeshComponent* GetMeshComponent();
@@ -75,9 +71,9 @@ public:
 
 
 protected:
-	// URuntimeMeshSceneObject's representation in UE Level is a ADynamicSDMCActor
+	// URuntimeMeshSceneObject's representation in UE Level is a AActor
 	UPROPERTY()
-	ADynamicSDMCActor* SimpleDynamicMeshActor = nullptr;
+	AActor* Actor = nullptr;
 
 protected:
 
@@ -85,8 +81,6 @@ protected:
 	TUniquePtr<FDynamicMeshAABBTree3> MeshAABBTree;
 
 	void UpdateSourceMesh(const FMeshDescription* MeshDescription);
-
-	void OnExternalDynamicMeshComponentUpdate();
 
 	TArray<UMaterialInterface*> Materials;
 	void UpdateComponentMaterials(bool bForceRefresh);
