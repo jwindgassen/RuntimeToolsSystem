@@ -6,36 +6,32 @@
 
 /** ToolBuilder for URuntimeDrawPolygonTool instances */
 UCLASS()
-class RUNTIMETOOLSSYSTEM_API URuntimeDrawPolygonToolBuilder : public UDrawPolygonToolBuilder
-{
-	GENERATED_BODY()
+class RUNTIMETOOLSSYSTEM_API URuntimeDrawPolygonToolBuilder : public UDrawPolygonToolBuilder {
+    GENERATED_BODY()
 
 public:
-	virtual UInteractiveTool* BuildTool(const FToolBuilderState& SceneState) const override;
+    virtual UInteractiveTool* BuildTool(const FToolBuilderState& SceneState) const override;
 };
 
 
 UENUM(BlueprintType)
-enum class ERuntimeDrawPolygonType : uint8
-{
-	Freehand = 0,
-	Circle = 1,
-	Square = 2,
-	Rectangle = 3,
-	RoundedRectangle = 4,
-	HoleyCircle = 5
+enum class ERuntimeDrawPolygonType : uint8 {
+    Freehand = 0,
+    Circle = 1,
+    Square = 2,
+    Rectangle = 3,
+    RoundedRectangle = 4,
+    HoleyCircle = 5
 };
 
 
 UCLASS(BlueprintType)
-class RUNTIMETOOLSSYSTEM_API URuntimeDrawPolygonToolProperties : public UInteractiveToolPropertySet
-{
-	GENERATED_BODY()
+class RUNTIMETOOLSSYSTEM_API URuntimeDrawPolygonToolProperties : public UInteractiveToolPropertySet {
+    GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite)
-	int SelectedPolygonType;
+    UPROPERTY(BlueprintReadWrite)
+    int SelectedPolygonType;
 };
-
 
 
 
@@ -44,13 +40,12 @@ public:
  * because the base implementation calls checkNoEntry() in non-Editor builds.
  */
 UCLASS(BlueprintType)
-class RUNTIMETOOLSSYSTEM_API URuntimeDrawPolygonTool : public UDrawPolygonTool
-{
-	GENERATED_BODY()
+class RUNTIMETOOLSSYSTEM_API URuntimeDrawPolygonTool : public UDrawPolygonTool {
+    GENERATED_BODY()
 
 public:
-	virtual void Setup() override;
+    virtual void Setup() override;
 
-	UPROPERTY(BlueprintReadOnly)
-	URuntimeDrawPolygonToolProperties* RuntimeProperties;
+    UPROPERTY(BlueprintReadOnly)
+    URuntimeDrawPolygonToolProperties* RuntimeProperties;
 };

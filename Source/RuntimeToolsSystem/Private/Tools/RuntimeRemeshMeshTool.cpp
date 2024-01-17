@@ -5,31 +5,35 @@
 
 #define LOCTEXT_NAMESPACE "URuntimeRemeshMeshTool"
 
-UMultiSelectionMeshEditingTool* URuntimeRemeshMeshToolBuilder::CreateNewTool(const FToolBuilderState& SceneState) const
-{
-	return NewObject<URuntimeRemeshMeshTool>(SceneState.ToolManager);
+UMultiSelectionMeshEditingTool* URuntimeRemeshMeshToolBuilder::CreateNewTool(const FToolBuilderState& SceneState
+) const {
+    return NewObject<URuntimeRemeshMeshTool>(SceneState.ToolManager);
 }
 
 
-void URuntimeRemeshMeshTool::Setup()
-{
-	URemeshMeshTool::Setup();
+void URuntimeRemeshMeshTool::Setup() {
+    URemeshMeshTool::Setup();
 
-	// disable wireframe because it crashes at runtime
-	//this->BasicProperties->bShowWireframe = false;
+    // disable wireframe because it crashes at runtime
+    // this->BasicProperties->bShowWireframe = false;
 
-	// mirror properties we want to expose at runtime 
-	RuntimeProperties = NewObject<URuntimeRemeshMeshToolProperties>(this);
+    // mirror properties we want to expose at runtime
+    RuntimeProperties = NewObject<URuntimeRemeshMeshToolProperties>(this);
 
-	RuntimeProperties->bDiscardAttributes = BasicProperties->bDiscardAttributes;
-	RuntimeProperties->WatchProperty(RuntimeProperties->bDiscardAttributes,
-		[this](bool bNewValue) { BasicProperties->bDiscardAttributes = bNewValue; BasicProperties->bPreserveSharpEdges = !bNewValue; Preview->InvalidateResult(); });
+    RuntimeProperties->bDiscardAttributes = BasicProperties->bDiscardAttributes;
+    RuntimeProperties->WatchProperty(RuntimeProperties->bDiscardAttributes, [this](bool bNewValue) {
+        BasicProperties->bDiscardAttributes = bNewValue;
+        BasicProperties->bPreserveSharpEdges = !bNewValue;
+        Preview->InvalidateResult();
+    });
 
-	RuntimeProperties->TargetTriangleCount = BasicProperties->TargetTriangleCount;
-	RuntimeProperties->WatchProperty(RuntimeProperties->TargetTriangleCount,
-		[this](int NewValue) { BasicProperties->TargetTriangleCount = NewValue; Preview->InvalidateResult(); });
+    RuntimeProperties->TargetTriangleCount = BasicProperties->TargetTriangleCount;
+    RuntimeProperties->WatchProperty(RuntimeProperties->TargetTriangleCount, [this](int NewValue) {
+        BasicProperties->TargetTriangleCount = NewValue;
+        Preview->InvalidateResult();
+    });
 
-	AddToolPropertySource(RuntimeProperties);
+    AddToolPropertySource(RuntimeProperties);
 }
 
 

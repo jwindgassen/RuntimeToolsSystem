@@ -13,78 +13,76 @@ struct FMeshDescription;
 /**
  * URuntimeMeshSceneObject is a "Scene Object" in the "Scene". Do not create these yourself.
  * Use the functions in URuntimeMeshSceneSubsystem to create and manage SceneObjects.
- * 
+ *
  * Conceptually, URuntimeMeshSceneObject is a triangle mesh object that can be selected,
- * transformed, and edited using mesh editing tools. 
- * 
+ * transformed, and edited using mesh editing tools.
+ *
  * Under the hood, URuntimeMeshSceneObject will spawn a ADynamicSDMCActor to actually implement
  * most of that functionality. But, the premise is that the higher level Scene is not aware
  * of those details.
  */
 UCLASS()
-class RUNTIMETOOLSSYSTEM_API URuntimeMeshSceneObject : public UObject
-{
-	using FDynamicMesh3 = UE::Geometry::FDynamicMesh3;
-	using FDynamicMeshAABBTree3 = UE::Geometry::FDynamicMeshAABBTree3;
+class RUNTIMETOOLSSYSTEM_API URuntimeMeshSceneObject : public UObject {
+    using FDynamicMesh3 = UE::Geometry::FDynamicMesh3;
+    using FDynamicMeshAABBTree3 = UE::Geometry::FDynamicMeshAABBTree3;
 
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	URuntimeMeshSceneObject();
+    URuntimeMeshSceneObject();
 
-	void Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription);
-	void Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh);
+    void Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription);
+    void Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh);
 
-	// set the 3D transform of this SceneObject
-	void SetTransform(FTransform Transform);
+    // set the 3D transform of this SceneObject
+    void SetTransform(FTransform Transform);
 
-	// get the Actor that represents this SceneObject
-	AActor* GetActor();
+    // get the Actor that represents this SceneObject
+    AActor* GetActor();
 
-	// get the mesh component that represents this SceneObject
-	UMeshComponent* GetMeshComponent();
-
-
-	//
-	// Material functions
-	//
-
-	UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
-	void CopyMaterialsFromComponent();
-
-	UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
-	void SetAllMaterials(UMaterialInterface* SetToMaterial);
-
-	UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
-	void SetToHighlightMaterial(UMaterialInterface* Material);
-
-	UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
-	void ClearHighlightMaterial();
+    // get the mesh component that represents this SceneObject
+    UMeshComponent* GetMeshComponent();
 
 
-	//
-	// Spatial Query functions
-	//
+    //
+    // Material functions
+    //
 
-	UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
-	bool IntersectRay(FVector RayOrigin, FVector RayDirection, FVector& WorldHitPoint, float& HitDistance, int& NearestTriangle, FVector& TriBaryCoords, float MaxDistance = 0);
+    UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
+    void CopyMaterialsFromComponent();
+
+    UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
+    void SetAllMaterials(UMaterialInterface* SetToMaterial);
+
+    UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
+    void SetToHighlightMaterial(UMaterialInterface* Material);
+
+    UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
+    void ClearHighlightMaterial();
 
 
-protected:
-	// URuntimeMeshSceneObject's representation in UE Level is a AActor
-	UPROPERTY()
-	AActor* Actor = nullptr;
+    //
+    // Spatial Query functions
+    //
+
+    UFUNCTION(BlueprintCallable, Category = "RuntimeMeshSceneObject")
+    bool IntersectRay(
+        FVector RayOrigin, FVector RayDirection, FVector& WorldHitPoint, float& HitDistance, int& NearestTriangle,
+        FVector& TriBaryCoords, float MaxDistance = 0
+    );
+
 
 protected:
+    // URuntimeMeshSceneObject's representation in UE Level is a AActor
+    UPROPERTY()
+    AActor* Actor = nullptr;
 
-	TUniquePtr<FDynamicMesh3> SourceMesh;
-	TUniquePtr<FDynamicMeshAABBTree3> MeshAABBTree;
+protected:
+    TUniquePtr<FDynamicMesh3> SourceMesh;
+    TUniquePtr<FDynamicMeshAABBTree3> MeshAABBTree;
 
-	void UpdateSourceMesh(const FMeshDescription* MeshDescription);
+    void UpdateSourceMesh(const FMeshDescription* MeshDescription);
 
-	TArray<UMaterialInterface*> Materials;
-	void UpdateComponentMaterials(bool bForceRefresh);
+    TArray<UMaterialInterface*> Materials;
+    void UpdateComponentMaterials(bool bForceRefresh);
 };
-
-
-

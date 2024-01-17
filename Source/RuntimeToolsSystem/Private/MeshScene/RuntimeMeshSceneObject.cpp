@@ -11,161 +11,149 @@
 
 using namespace UE::Geometry;
 
-URuntimeMeshSceneObject::URuntimeMeshSceneObject()
-{
-	if (!SourceMesh)
-	{
-		SourceMesh = MakeUnique<FDynamicMesh3>();
-	}
-	if (!MeshAABBTree)
-	{
-		MeshAABBTree = MakeUnique<FDynamicMeshAABBTree3>();
-	}
+URuntimeMeshSceneObject::URuntimeMeshSceneObject() {
+    if (!SourceMesh) {
+        SourceMesh = MakeUnique<FDynamicMesh3>();
+    }
+    if (!MeshAABBTree) {
+        MeshAABBTree = MakeUnique<FDynamicMeshAABBTree3>();
+    }
 
-	UMaterialInterface* DefaultMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
-	Materials.Add(DefaultMaterial);
+    UMaterialInterface* DefaultMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
+    Materials.Add(DefaultMaterial);
 }
 
 
-void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription)
-{
-	FActorSpawnParameters SpawnInfo;
-	Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
+void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription) {
+    FActorSpawnParameters SpawnInfo;
+    Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
 
-	UpdateSourceMesh(InitialMeshDescription);
-	UpdateComponentMaterials(false);
+    UpdateSourceMesh(InitialMeshDescription);
+    UpdateComponentMaterials(false);
 }
 
-void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh)
-{
-	FActorSpawnParameters SpawnInfo;
-	Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
+void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh) {
+    FActorSpawnParameters SpawnInfo;
+    Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
 
-	*SourceMesh = *InitialMesh;
-	MeshAABBTree->SetMesh(SourceMesh.Get(), true);
+    *SourceMesh = *InitialMesh;
+    MeshAABBTree->SetMesh(SourceMesh.Get(), true);
 
-	UpdateComponentMaterials(false);
-}
-
-
-void URuntimeMeshSceneObject::SetTransform(FTransform Transform)
-{
-	GetActor()->SetActorTransform(Transform);
+    UpdateComponentMaterials(false);
 }
 
 
-AActor* URuntimeMeshSceneObject::GetActor()
-{
-	return Actor;
+void URuntimeMeshSceneObject::SetTransform(FTransform Transform) {
+    GetActor()->SetActorTransform(Transform);
 }
 
-UMeshComponent* URuntimeMeshSceneObject::GetMeshComponent()
-{
-	return Actor->FindComponentByClass<UMeshComponent>();
+
+AActor* URuntimeMeshSceneObject::GetActor() {
+    return Actor;
+}
+
+UMeshComponent* URuntimeMeshSceneObject::GetMeshComponent() {
+    return Actor->FindComponentByClass<UMeshComponent>();
 }
 
 
 
-void URuntimeMeshSceneObject::CopyMaterialsFromComponent()
-{
-	UMeshComponent* Component = GetMeshComponent();
-	int32 NumMaterials = Component->GetNumMaterials();
-	if (NumMaterials == 0)
-	{
-		Materials = { UMaterial::GetDefaultMaterial(MD_Surface) };
-	}
-	else
-	{
-		Materials.SetNum(NumMaterials);
-		for (int32 k = 0; k < NumMaterials; ++k)
-		{
-			Materials[k] = Component->GetMaterial(k);
-		}
-	}
+void URuntimeMeshSceneObject::CopyMaterialsFromComponent() {
+    UMeshComponent* Component = GetMeshComponent();
+    int32 NumMaterials = Component->GetNumMaterials();
+    if (NumMaterials == 0) {
+        Materials = {UMaterial::GetDefaultMaterial(MD_Surface)};
+    } else {
+        Materials.SetNum(NumMaterials);
+        for (int32 k = 0; k < NumMaterials; ++k) {
+            Materials[k] = Component->GetMaterial(k);
+        }
+    }
 }
 
 
-void URuntimeMeshSceneObject::SetAllMaterials(UMaterialInterface* SetToMaterial)
-{
-	int32 NumMaterials = Materials.Num();
-	for (int32 k = 0; k < NumMaterials; ++k)
-	{
-		Materials[k] = SetToMaterial;
-	}
-	UpdateComponentMaterials(true);
+void URuntimeMeshSceneObject::SetAllMaterials(UMaterialInterface* SetToMaterial) {
+    int32 NumMaterials = Materials.Num();
+    for (int32 k = 0; k < NumMaterials; ++k) {
+        Materials[k] = SetToMaterial;
+    }
+    UpdateComponentMaterials(true);
 }
 
 
-void URuntimeMeshSceneObject::SetToHighlightMaterial(UMaterialInterface* Material)
-{
-	UMeshComponent* Component = GetMeshComponent();
-	int32 NumMaterials = FMath::Max(1, Component->GetNumMaterials());
-	for (int32 k = 0; k < NumMaterials; ++k)
-	{
-		Component->SetMaterial(k, Material);
-	}
+void URuntimeMeshSceneObject::SetToHighlightMaterial(UMaterialInterface* Material) {
+    UMeshComponent* Component = GetMeshComponent();
+    int32 NumMaterials = FMath::Max(1, Component->GetNumMaterials());
+    for (int32 k = 0; k < NumMaterials; ++k) {
+        Component->SetMaterial(k, Material);
+    }
 }
 
-void URuntimeMeshSceneObject::ClearHighlightMaterial()
-{
-	UpdateComponentMaterials(true);
+void URuntimeMeshSceneObject::ClearHighlightMaterial() {
+    UpdateComponentMaterials(true);
 }
 
 
-void URuntimeMeshSceneObject::UpdateComponentMaterials(bool bForceRefresh)
-{
-	UMaterialInterface* DefaultMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
+void URuntimeMeshSceneObject::UpdateComponentMaterials(bool bForceRefresh) {
+    UMaterialInterface* DefaultMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
 
-	UMeshComponent* Component = GetMeshComponent();
-	if (!Component) return;
+    UMeshComponent* Component = GetMeshComponent();
+    if (!Component) {
+        return;
+    }
 
-	int32 NumMaterials = FMath::Max(1, Component->GetNumMaterials());
-	for (int32 k = 0; k < NumMaterials; ++k)
-	{
-		UMaterialInterface* SetMaterial = (k < Materials.Num()) ? Materials[k] : DefaultMaterial;
-		Component->SetMaterial(k, SetMaterial);
-	}
+    int32 NumMaterials = FMath::Max(1, Component->GetNumMaterials());
+    for (int32 k = 0; k < NumMaterials; ++k) {
+        UMaterialInterface* SetMaterial = (k < Materials.Num()) ? Materials[k] : DefaultMaterial;
+        Component->SetMaterial(k, SetMaterial);
+    }
 }
 
 
 
-void URuntimeMeshSceneObject::UpdateSourceMesh(const FMeshDescription* MeshDescriptionIn)
-{
-	FMeshDescriptionToDynamicMesh Converter;
-	FDynamicMesh3 TmpMesh;
-	Converter.Convert(MeshDescriptionIn, TmpMesh);
-	*SourceMesh = MoveTemp(TmpMesh);
+void URuntimeMeshSceneObject::UpdateSourceMesh(const FMeshDescription* MeshDescriptionIn) {
+    FMeshDescriptionToDynamicMesh Converter;
+    FDynamicMesh3 TmpMesh;
+    Converter.Convert(MeshDescriptionIn, TmpMesh);
+    *SourceMesh = MoveTemp(TmpMesh);
 
-	MeshAABBTree->SetMesh(SourceMesh.Get(), true);
+    MeshAABBTree->SetMesh(SourceMesh.Get(), true);
 }
 
 
 
-bool URuntimeMeshSceneObject::IntersectRay(FVector RayOrigin, FVector RayDirection, FVector& WorldHitPoint, float& HitDistance, int& NearestTriangle, FVector& TriBaryCoords, float MaxDistance)
-{
-	if (!ensure(SourceMesh)) return false;
-	if (!GetActor()) return false;		// this can happen if the Actor gets deleted but the SO does not. Bad situation but avoids crash...
+bool URuntimeMeshSceneObject::IntersectRay(
+    FVector RayOrigin, FVector RayDirection, FVector& WorldHitPoint, float& HitDistance, int& NearestTriangle,
+    FVector& TriBaryCoords, float MaxDistance
+) {
+    if (!ensure(SourceMesh)) {
+        return false;
+    }
+    if (!GetActor()) {
+        return false;  // this can happen if the Actor gets deleted but the SO does not. Bad situation but avoids
+                       // crash...
+    }
 
-	FTransformSRT3d ActorToWorld(GetActor()->GetActorTransform());
-	FVector3d WorldDirection(RayDirection); WorldDirection.Normalize();
-	FRay3d LocalRay(ActorToWorld.InverseTransformPosition((FVector3d)RayOrigin),
-		ActorToWorld.InverseTransformNormal(WorldDirection));
-	IMeshSpatial::FQueryOptions QueryOptions;
-	if (MaxDistance > 0)
-	{
-		QueryOptions.MaxDistance = MaxDistance;
-	}
-	NearestTriangle = MeshAABBTree->FindNearestHitTriangle(LocalRay, QueryOptions);
-	if (SourceMesh->IsTriangle(NearestTriangle))
-	{
-		FIntrRay3Triangle3d IntrQuery = TMeshQueries<FDynamicMesh3>::TriangleIntersection(*SourceMesh, NearestTriangle, LocalRay);
-		if (IntrQuery.IntersectionType == EIntersectionType::Point)
-		{
-			HitDistance = IntrQuery.RayParameter;
-			WorldHitPoint = (FVector)ActorToWorld.TransformPosition(LocalRay.PointAt(IntrQuery.RayParameter));
-			TriBaryCoords = (FVector)IntrQuery.TriangleBaryCoords;
-			return true;
-		}
-	}
-	return false;
+    FTransformSRT3d ActorToWorld(GetActor()->GetActorTransform());
+    FVector3d WorldDirection(RayDirection);
+    WorldDirection.Normalize();
+    FRay3d LocalRay(
+        ActorToWorld.InverseTransformPosition(RayOrigin), ActorToWorld.InverseTransformNormal(WorldDirection)
+    );
+    IMeshSpatial::FQueryOptions QueryOptions;
+    if (MaxDistance > 0) {
+        QueryOptions.MaxDistance = MaxDistance;
+    }
+    NearestTriangle = MeshAABBTree->FindNearestHitTriangle(LocalRay, QueryOptions);
+    if (SourceMesh->IsTriangle(NearestTriangle)) {
+        FIntrRay3Triangle3d IntrQuery =
+            TMeshQueries<FDynamicMesh3>::TriangleIntersection(*SourceMesh, NearestTriangle, LocalRay);
+        if (IntrQuery.IntersectionType == EIntersectionType::Point) {
+            HitDistance = IntrQuery.RayParameter;
+            WorldHitPoint = ActorToWorld.TransformPosition(LocalRay.PointAt(IntrQuery.RayParameter));
+            TriBaryCoords = IntrQuery.TriangleBaryCoords;
+            return true;
+        }
+    }
+    return false;
 }

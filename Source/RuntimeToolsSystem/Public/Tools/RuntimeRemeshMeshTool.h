@@ -5,36 +5,33 @@
 
 /** ToolBuilder for URuntimeDrawPolygonTool instances */
 UCLASS()
-class RUNTIMETOOLSSYSTEM_API URuntimeRemeshMeshToolBuilder : public URemeshMeshToolBuilder
-{
-	GENERATED_BODY()
+class RUNTIMETOOLSSYSTEM_API URuntimeRemeshMeshToolBuilder : public URemeshMeshToolBuilder {
+    GENERATED_BODY()
 public:
-	virtual UMultiSelectionMeshEditingTool* CreateNewTool(const FToolBuilderState& SceneState) const override;
+    virtual UMultiSelectionMeshEditingTool* CreateNewTool(const FToolBuilderState& SceneState) const override;
 };
 
 
 
 UCLASS(BlueprintType)
-class RUNTIMETOOLSSYSTEM_API URuntimeRemeshMeshToolProperties : public UInteractiveToolPropertySet
-{
-	GENERATED_BODY()
+class RUNTIMETOOLSSYSTEM_API URuntimeRemeshMeshToolProperties : public UInteractiveToolPropertySet {
+    GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite)
-	int TargetTriangleCount;
+    UPROPERTY(BlueprintReadWrite)
+    int TargetTriangleCount;
 
-	UPROPERTY(BlueprintReadWrite)
-	bool bDiscardAttributes;
+    UPROPERTY(BlueprintReadWrite)
+    bool bDiscardAttributes;
 };
 
 
 UCLASS(BlueprintType)
-class RUNTIMETOOLSSYSTEM_API URuntimeRemeshMeshTool : public URemeshMeshTool
-{
-	GENERATED_BODY()
+class RUNTIMETOOLSSYSTEM_API URuntimeRemeshMeshTool : public URemeshMeshTool {
+    GENERATED_BODY()
 
 public:
-	virtual void Setup() override;
+    virtual void Setup() override;
 
-	UPROPERTY(BlueprintReadOnly)
-	URuntimeRemeshMeshToolProperties* RuntimeProperties;
+    UPROPERTY(BlueprintReadOnly)
+    URuntimeRemeshMeshToolProperties* RuntimeProperties;
 };

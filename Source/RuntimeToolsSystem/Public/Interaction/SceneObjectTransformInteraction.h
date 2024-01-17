@@ -18,43 +18,41 @@ class URuntimeMeshSceneObject;
  * See UTransformMeshesTool for sample code for doing things like modifying pivot dynamically/etc.
  */
 UCLASS()
-class USceneObjectTransformInteraction : public UObject
-{
-	GENERATED_BODY()
+class USceneObjectTransformInteraction : public UObject {
+    GENERATED_BODY()
 public:
+    /**
+     * Set up the transform interaction.
+     * @param GizmoEnabledCallbackIn callback that determines if Gizmo should be created and visible. For example during
+     * a Tool we generally want to hide the TRS Gizmo.
+     */
+    void Initialize(TUniqueFunction<bool()> GizmoEnabledCallbackIn);
 
-	/**
-	 * Set up the transform interaction. 
-	 * @param GizmoEnabledCallbackIn callback that determines if Gizmo should be created and visible. For example during a Tool we generally want to hide the TRS Gizmo.
-	 */
-	void Initialize(TUniqueFunction<bool()> GizmoEnabledCallbackIn);
+    void Shutdown();
 
-	void Shutdown();
+    UFUNCTION(BlueprintCallable)
+    void SetEnableScaling(bool bEnable);
 
-	UFUNCTION(BlueprintCallable)
-	void SetEnableScaling(bool bEnable);
+    UFUNCTION(BlueprintCallable)
+    void SetEnableNonUniformScaling(bool bEnable);
 
-	UFUNCTION(BlueprintCallable)
-	void SetEnableNonUniformScaling(bool bEnable);
-
-	// Recreate Gizmo. Call when external state changes, like set of selected objects
-	UFUNCTION(BlueprintCallable)
-	void ForceUpdateGizmoState();
+    // Recreate Gizmo. Call when external state changes, like set of selected objects
+    UFUNCTION(BlueprintCallable)
+    void ForceUpdateGizmoState();
 
 protected:
+    FDelegateHandle SelectionChangedEventHandle;
 
-	FDelegateHandle SelectionChangedEventHandle;
+    UPROPERTY()
+    UTransformProxy* TransformProxy;
 
-	UPROPERTY()
-	UTransformProxy* TransformProxy;
+    UPROPERTY()
+    UCombinedTransformGizmo* TransformGizmo;
 
-	UPROPERTY()
-	UCombinedTransformGizmo* TransformGizmo;
+    void UpdateGizmoTargets(const TArray<URuntimeMeshSceneObject*>& Selection);
 
-	void UpdateGizmoTargets(const TArray<URuntimeMeshSceneObject*>& Selection);
+    bool bEnableScaling = true;
+    bool bEnableNonUniformScaling = true;
 
-	bool bEnableScaling = true;
-	bool bEnableNonUniformScaling = true;
-
-	TUniqueFunction<bool()> GizmoEnabledCallback = [&]() { return true; };
+    TUniqueFunction<bool()> GizmoEnabledCallback = [&]() { return true; };
 };

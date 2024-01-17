@@ -2,32 +2,31 @@
 #include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
 #include "MeshScene/RuntimeMeshSceneSubsystem.h"
 
-#define LOCTEXT_NAMESPACE "URuntimeDrawPolygonTool" 
+#define LOCTEXT_NAMESPACE "URuntimeDrawPolygonTool"
 
-UInteractiveTool* URuntimeDrawPolygonToolBuilder::BuildTool(const FToolBuilderState& SceneState) const
-{
-	URuntimeDrawPolygonTool* NewTool = NewObject<URuntimeDrawPolygonTool>(SceneState.ToolManager);
-	NewTool->SetWorld(SceneState.World);
-	return NewTool;
+UInteractiveTool* URuntimeDrawPolygonToolBuilder::BuildTool(const FToolBuilderState& SceneState) const {
+    URuntimeDrawPolygonTool* NewTool = NewObject<URuntimeDrawPolygonTool>(SceneState.ToolManager);
+    NewTool->SetWorld(SceneState.World);
+    return NewTool;
 }
 
 
 
-void URuntimeDrawPolygonTool::Setup()
-{
-	UDrawPolygonTool::Setup();
+void URuntimeDrawPolygonTool::Setup() {
+    UDrawPolygonTool::Setup();
 
-	// initialize to drawing material
-	this->MaterialProperties->Material = URuntimeMeshSceneSubsystem::Get()->StandardMaterial;
+    // initialize to drawing material
+    this->MaterialProperties->Material = URuntimeMeshSceneSubsystem::Get()->StandardMaterial;
 
-	// mirror properties we want to expose at runtime 
-	RuntimeProperties = NewObject<URuntimeDrawPolygonToolProperties>(this);
+    // mirror properties we want to expose at runtime
+    RuntimeProperties = NewObject<URuntimeDrawPolygonToolProperties>(this);
 
-	RuntimeProperties->SelectedPolygonType = (int)PolygonProperties->PolygonDrawMode;
-	RuntimeProperties->WatchProperty(RuntimeProperties->SelectedPolygonType,
-		[this](int NewType) { PolygonProperties->PolygonDrawMode = (EDrawPolygonDrawMode)NewType; });
+    RuntimeProperties->SelectedPolygonType = static_cast<int>(PolygonProperties->PolygonDrawMode);
+    RuntimeProperties->WatchProperty(RuntimeProperties->SelectedPolygonType, [this](int NewType) {
+        PolygonProperties->PolygonDrawMode = static_cast<EDrawPolygonDrawMode>(NewType);
+    });
 
-	AddToolPropertySource(RuntimeProperties);
+    AddToolPropertySource(RuntimeProperties);
 }
 
 
