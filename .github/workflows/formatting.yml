@@ -1,0 +1,13 @@
+on: [push, pull_request]
+
+jobs:
+  clang-format:
+    name: Check C++ formatting with clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: "14"
+          check-path: "Source/RuntimeToolsSystem"
+          fallback-style: "Google"
