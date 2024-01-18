@@ -1,7 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "RuntimeToolsFramework/ToolsContextRenderComponent.h"
+#include "ToolsContextRenderComponent.h"
 #include "PrimitiveSceneProxy.h"
 #include "SceneManagement.h"
 

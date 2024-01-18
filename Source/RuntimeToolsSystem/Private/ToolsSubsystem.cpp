@@ -1,29 +1,21 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
-
+#include "ToolsSubsystem.h"
+#include "History/SceneHistoryManager.h"
 #include "ToolContextInterfaces.h"
-#include "RuntimeToolsFramework/ToolsContextActor.h"
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
-
+#include "ToolsContextActor.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Slate/SceneViewport.h"
 #include "Slate/SGameLayerManager.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
-
 #include "ContextObjectStore.h"
 #include "MaterialDomain.h"
+#include "MeshSceneSubsystem.h"
 #include "ToolTargetManager.h"
+#include "Interaction/SceneObject.h"
 #include "RuntimeToolsFramework/RuntimeDynamicMeshComponentToolTarget.h"
-
 #include "Materials/Material.h"
-
-#include "BaseGizmos/GizmoRenderingUtil.h"
 #include "BaseGizmos/TransformGizmoUtil.h"
 #include "BaseGizmos/GizmoViewContext.h"
-
 #include "RuntimeToolsFramework/RuntimeModelingObjectsCreationAPI.h"
 
 
@@ -53,8 +45,8 @@ public:
         StateOut.GizmoManager = ToolsContext->GizmoManager;
         StateOut.World = TargetWorld;
 
-        const TArray<URuntimeMeshSceneObject*>& Selection = URuntimeMeshSceneSubsystem::Get()->GetSelection();
-        for (URuntimeMeshSceneObject* SO : Selection) {
+        const TArray<USceneObject*>& Selection = UMeshSceneSubsystem::Get()->GetSelection();
+        for (USceneObject* SO : Selection) {
             StateOut.SelectedActors.Add(SO->GetActor());
             StateOut.SelectedComponents.Add(SO->GetMeshComponent());
         }
@@ -81,7 +73,7 @@ public:
     }
 
     virtual EToolContextCoordinateSystem GetCurrentCoordinateSystem() const override {
-        return URuntimeToolsFrameworkSubsystem::Get()->GetCurrentCoordinateSystem();
+        return UToolsSubsystem::Get()->GetCurrentCoordinateSystem();
     }
 
     virtual FToolContextSnappingConfiguration GetCurrentSnappingSettings() const override {
@@ -122,12 +114,12 @@ public:
     }
 
     virtual void BeginUndoTransaction(const FText& Description) override {
-        URuntimeToolsFrameworkSubsystem::Get()->SceneHistory->BeginTransaction(Description);
+        UToolsSubsystem::Get()->SceneHistory->BeginTransaction(Description);
         bInTransaction = true;
     }
 
     virtual void EndUndoTransaction() override {
-        URuntimeToolsFrameworkSubsystem::Get()->SceneHistory->EndTransaction();
+        UToolsSubsystem::Get()->SceneHistory->EndTransaction();
         bInTransaction = false;
     }
 
@@ -139,7 +131,7 @@ public:
             bCloseTransaction = true;
         }
 
-        URuntimeToolsFrameworkSubsystem::Get()->SceneHistory->AppendChange(TargetObject, MoveTemp(Change), Description);
+        UToolsSubsystem::Get()->SceneHistory->AppendChange(TargetObject, MoveTemp(Change), Description);
 
         if (bCloseTransaction) {
             EndUndoTransaction();
@@ -154,28 +146,28 @@ public:
 
 
 
-URuntimeToolsFrameworkSubsystem* URuntimeToolsFrameworkSubsystem::InstanceSingleton = nullptr;
+UToolsSubsystem* UToolsSubsystem::InstanceSingleton = nullptr;
 
-void URuntimeToolsFrameworkSubsystem::InitializeSingleton(URuntimeToolsFrameworkSubsystem* Subsystem) {
+void UToolsSubsystem::InitializeSingleton(UToolsSubsystem* Subsystem) {
     check(InstanceSingleton == nullptr);
     InstanceSingleton = Subsystem;
 }
 
 
-URuntimeToolsFrameworkSubsystem* URuntimeToolsFrameworkSubsystem::Get() {
+UToolsSubsystem* UToolsSubsystem::Get() {
     check(InstanceSingleton);
     return InstanceSingleton;
 }
 
 
-void URuntimeToolsFrameworkSubsystem::Deinitialize() {
+void UToolsSubsystem::Deinitialize() {
     ShutdownToolsContext();
 
     InstanceSingleton = nullptr;
 }
 
 
-void URuntimeToolsFrameworkSubsystem::InitializeToolsContext(UWorld* TargetWorldIn) {
+void UToolsSubsystem::InitializeToolsContext(UWorld* TargetWorldIn) {
     TargetWorld = TargetWorldIn;
 
     ToolsContext = NewObject<UInteractiveToolsContext>();
@@ -190,12 +182,12 @@ void URuntimeToolsFrameworkSubsystem::InitializeToolsContext(UWorld* TargetWorld
     ToolsContext->Initialize(ContextQueriesAPI.Get(), ContextTransactionsAPI.Get());
 
     // register event handlers
-    ToolsContext->ToolManager->OnToolStarted.AddUObject(this, &URuntimeToolsFrameworkSubsystem::OnToolStarted);
-    ToolsContext->ToolManager->OnToolEnded.AddUObject(this, &URuntimeToolsFrameworkSubsystem::OnToolEnded);
+    ToolsContext->ToolManager->OnToolStarted.AddUObject(this, &UToolsSubsystem::OnToolStarted);
+    ToolsContext->ToolManager->OnToolEnded.AddUObject(this, &UToolsSubsystem::OnToolEnded);
 
     // create scene history
     SceneHistory = NewObject<USceneHistoryManager>(this);
-    SceneHistory->OnHistoryStateChange.AddUObject(this, &URuntimeToolsFrameworkSubsystem::OnSceneHistoryStateChange);
+    SceneHistory->OnHistoryStateChange.AddUObject(this, &UToolsSubsystem::OnSceneHistoryStateChange);
 
 
     // register selection interaction
@@ -235,7 +227,7 @@ void URuntimeToolsFrameworkSubsystem::InitializeToolsContext(UWorld* TargetWorld
 }
 
 
-void URuntimeToolsFrameworkSubsystem::ShutdownToolsContext() {
+void UToolsSubsystem::ShutdownToolsContext() {
     bIsShuttingDown = true;
 
     if (ToolsContext != nullptr) {
@@ -274,26 +266,26 @@ void URuntimeToolsFrameworkSubsystem::ShutdownToolsContext() {
 
 
 
-void URuntimeToolsFrameworkSubsystem::OnToolStarted(UInteractiveToolManager* Manager, UInteractiveTool* Tool) {
+void UToolsSubsystem::OnToolStarted(UInteractiveToolManager* Manager, UInteractiveTool* Tool) {
     AddAllPropertySetKeepalives(Tool);
 
     TransformInteraction->ForceUpdateGizmoState();
 }
 
-void URuntimeToolsFrameworkSubsystem::OnToolEnded(UInteractiveToolManager* Manager, UInteractiveTool* Tool) {
+void UToolsSubsystem::OnToolEnded(UInteractiveToolManager* Manager, UInteractiveTool* Tool) {
     if (!bIsShuttingDown) {
         TransformInteraction->ForceUpdateGizmoState();
     }
 }
 
-void URuntimeToolsFrameworkSubsystem::OnSceneHistoryStateChange() {
+void UToolsSubsystem::OnSceneHistoryStateChange() {
     if (!bIsShuttingDown) {
         TransformInteraction->ForceUpdateGizmoState();
     }
 }
 
 
-bool URuntimeToolsFrameworkSubsystem::IsCapturingMouse() const {
+bool UToolsSubsystem::IsCapturingMouse() const {
     return ToolsContext && ToolsContext->InputRouter->HasActiveMouseCapture();
 }
 
@@ -333,7 +325,7 @@ public:
 
 
 PRAGMA_DISABLE_OPTIMIZATION
-void URuntimeToolsFrameworkSubsystem::Tick(float DeltaTime) {
+void UToolsSubsystem::Tick(float DeltaTime) {
     if (ensure(ContextActor) == false) {
         return;
     }
@@ -468,7 +460,7 @@ void URuntimeToolsFrameworkSubsystem::Tick(float DeltaTime) {
 }
 PRAGMA_ENABLE_OPTIMIZATION
 
-void URuntimeToolsFrameworkSubsystem::SetContextActor(AToolsContextActor* ActorIn) {
+void UToolsSubsystem::SetContextActor(AToolsContextActor* ActorIn) {
     ContextActor = ActorIn;
     if (ContextQueriesAPI) {
         ContextQueriesAPI->SetContextActor(ContextActor);
@@ -476,30 +468,30 @@ void URuntimeToolsFrameworkSubsystem::SetContextActor(AToolsContextActor* ActorI
 }
 
 
-IToolsContextTransactionsAPI* URuntimeToolsFrameworkSubsystem::GetTransactionsAPI() {
+IToolsContextTransactionsAPI* UToolsSubsystem::GetTransactionsAPI() {
     return ContextTransactionsAPI.Get();
 }
 
 
 
-void URuntimeToolsFrameworkSubsystem::OnLeftMouseDown() {
+void UToolsSubsystem::OnLeftMouseDown() {
     CurrentMouseState.Mouse.Left.SetStates(true, false, false);
     bPendingMouseStateChange = true;
 }
 
-void URuntimeToolsFrameworkSubsystem::OnLeftMouseUp() {
+void UToolsSubsystem::OnLeftMouseUp() {
     CurrentMouseState.Mouse.Left.SetStates(false, false, true);
     bPendingMouseStateChange = true;
 }
 
 
 
-bool URuntimeToolsFrameworkSubsystem::CanActivateToolByName(FString Name) {
+bool UToolsSubsystem::CanActivateToolByName(FString Name) {
     return true;
 }
 
 
-UInteractiveTool* URuntimeToolsFrameworkSubsystem::BeginToolByName(FString Name) {
+UInteractiveTool* UToolsSubsystem::BeginToolByName(FString Name) {
     if (ToolsContext && ToolsContext->ToolManager) {
         bool bFound = ToolsContext->ToolManager->SelectActiveToolType(EToolSide::Mouse, Name);
 
@@ -513,47 +505,47 @@ UInteractiveTool* URuntimeToolsFrameworkSubsystem::BeginToolByName(FString Name)
 
             UE_LOG(
                 LogTemp, Warning,
-                TEXT("URuntimeToolsFrameworkSubsystem::BeginToolByName - Failed to Activate Tool of type %s!"), *Name
+                TEXT("UToolsSubsystem::BeginToolByName - Failed to Activate Tool of type %s!"), *Name
             );
         } else {
             UE_LOG(
                 LogTemp, Warning,
-                TEXT("URuntimeToolsFrameworkSubsystem::BeginToolByName - Tool Type %s Not Registered!"), *Name
+                TEXT("UToolsSubsystem::BeginToolByName - Tool Type %s Not Registered!"), *Name
             );
         }
     } else {
         UE_LOG(
             LogTemp, Warning,
-            TEXT("URuntimeToolsFrameworkSubsystem::BeginToolByName - Tools Context is not initialized!")
+            TEXT("UToolsSubsystem::BeginToolByName - Tools Context is not initialized!")
         );
     }
     return nullptr;
 }
 
 
-bool URuntimeToolsFrameworkSubsystem::HaveActiveTool() {
+bool UToolsSubsystem::HaveActiveTool() {
     return (ToolsContext != nullptr) && (ToolsContext->ToolManager != nullptr) &&
            ToolsContext->ToolManager->HasActiveTool(EToolSide::Mouse);
 }
 
 
-UInteractiveTool* URuntimeToolsFrameworkSubsystem::GetActiveTool() {
+UInteractiveTool* UToolsSubsystem::GetActiveTool() {
     return HaveActiveTool() ? ToolsContext->ToolManager->GetActiveTool(EToolSide::Mouse) : nullptr;
 }
 
 
-bool URuntimeToolsFrameworkSubsystem::IsActiveToolAcceptCancelType() {
+bool UToolsSubsystem::IsActiveToolAcceptCancelType() {
     return (ToolsContext != nullptr) && (ToolsContext->ToolManager != nullptr) &&
            ToolsContext->ToolManager->HasActiveTool(EToolSide::Mouse) &&
            ToolsContext->ToolManager->GetActiveTool(EToolSide::Mouse)->HasAccept();
 }
 
-bool URuntimeToolsFrameworkSubsystem::CanAcceptActiveTool() {
+bool UToolsSubsystem::CanAcceptActiveTool() {
     return (ToolsContext != nullptr) && (ToolsContext->ToolManager != nullptr) &&
            ToolsContext->ToolManager->CanAcceptActiveTool(EToolSide::Mouse);
 }
 
-bool URuntimeToolsFrameworkSubsystem::AcceptActiveTool() {
+bool UToolsSubsystem::AcceptActiveTool() {
     if (ToolsContext && ToolsContext->ToolManager) {
         bool bActive = ToolsContext->ToolManager->HasActiveTool(EToolSide::Mouse);
         if (bActive) {
@@ -563,16 +555,16 @@ bool URuntimeToolsFrameworkSubsystem::AcceptActiveTool() {
             } else {
                 UE_LOG(
                     LogTemp, Warning,
-                    TEXT("URuntimeToolsFrameworkSubsystem::AcceptActiveTool - Cannot Accept Active Tool!")
+                    TEXT("UToolsSubsystem::AcceptActiveTool - Cannot Accept Active Tool!")
                 );
             }
         } else {
-            UE_LOG(LogTemp, Warning, TEXT("URuntimeToolsFrameworkSubsystem::AcceptActiveTool - No Active Tool!"));
+            UE_LOG(LogTemp, Warning, TEXT("UToolsSubsystem::AcceptActiveTool - No Active Tool!"));
         }
     } else {
         UE_LOG(
             LogTemp, Warning,
-            TEXT("URuntimeToolsFrameworkSubsystem::AcceptActiveTool - Tools Context is not initialized!")
+            TEXT("UToolsSubsystem::AcceptActiveTool - Tools Context is not initialized!")
         );
     }
 
@@ -581,7 +573,7 @@ bool URuntimeToolsFrameworkSubsystem::AcceptActiveTool() {
 }
 
 
-bool URuntimeToolsFrameworkSubsystem::CancelOrCompleteActiveTool() {
+bool UToolsSubsystem::CancelOrCompleteActiveTool() {
     if (ToolsContext && ToolsContext->ToolManager) {
         bool bActive = ToolsContext->ToolManager->HasActiveTool(EToolSide::Mouse);
         if (bActive) {
@@ -591,13 +583,13 @@ bool URuntimeToolsFrameworkSubsystem::CancelOrCompleteActiveTool() {
             ToolsContext->ToolManager->DeactivateTool(EToolSide::Mouse, ShutdownType);
         } else {
             UE_LOG(
-                LogTemp, Warning, TEXT("URuntimeToolsFrameworkSubsystem::CancelOrCompleteActiveTool - No Active Tool!")
+                LogTemp, Warning, TEXT("UToolsSubsystem::CancelOrCompleteActiveTool - No Active Tool!")
             );
         }
     } else {
         UE_LOG(
             LogTemp, Warning,
-            TEXT("URuntimeToolsFrameworkSubsystem::CancelOrCompleteActiveTool - Tools Context is not initialized!")
+            TEXT("UToolsSubsystem::CancelOrCompleteActiveTool - Tools Context is not initialized!")
         );
     }
 
@@ -607,12 +599,12 @@ bool URuntimeToolsFrameworkSubsystem::CancelOrCompleteActiveTool() {
 
 
 
-void URuntimeToolsFrameworkSubsystem::InternalConsistencyChecks() {
+void UToolsSubsystem::InternalConsistencyChecks() {
     if (GetSceneHistory()) {
         if (!ensure(GetSceneHistory()->IsBuildingTransaction() == false)) {
             UE_LOG(
                 LogTemp, Warning,
-                TEXT("[URuntimeToolsFrameworkSubsystem::InternalConsistencyChecks] still Building Transaction! "
+                TEXT("[UToolsSubsystem::InternalConsistencyChecks] still Building Transaction! "
                      "Likely forgot to EndTransaction() somewhere!!")
             );
         }
@@ -621,7 +613,7 @@ void URuntimeToolsFrameworkSubsystem::InternalConsistencyChecks() {
 
 
 
-TArray<UObject*> URuntimeToolsFrameworkSubsystem::GetActiveToolPropertySets() {
+TArray<UObject*> UToolsSubsystem::GetActiveToolPropertySets() {
     TArray<UObject*> Result;
     if (HaveActiveTool()) {
         Result = ToolsContext->ToolManager->GetActiveTool(EToolSide::Mouse)->GetToolProperties();
@@ -631,21 +623,12 @@ TArray<UObject*> URuntimeToolsFrameworkSubsystem::GetActiveToolPropertySets() {
 
 
 
-URuntimeMeshSceneObject* URuntimeToolsFrameworkSubsystem::ImportMeshSceneObject(
-    const FString ImportPath, bool bFlipOrientation
-) {
-    checkNoEntry();
-    return nullptr;
-}
-
-
-
-void URuntimeToolsFrameworkSubsystem::SetCurrentCoordinateSystem(EToolContextCoordinateSystem CoordSystem) {
+void UToolsSubsystem::SetCurrentCoordinateSystem(EToolContextCoordinateSystem CoordSystem) {
     CurrentCoordinateSystem = CoordSystem;
     // TransformInteraction->ForceUpdateGizmoState();
 }
 
-void URuntimeToolsFrameworkSubsystem::CycleCurrentCoordinateSystem() {
+void UToolsSubsystem::CycleCurrentCoordinateSystem() {
     int32 CurCoordSystem = static_cast<int>(CurrentCoordinateSystem);
     int32 NewCoordSystem = (CurCoordSystem + 1) % 2;
     SetCurrentCoordinateSystem(static_cast<EToolContextCoordinateSystem>(NewCoordSystem));
@@ -653,7 +636,7 @@ void URuntimeToolsFrameworkSubsystem::CycleCurrentCoordinateSystem() {
 
 
 
-void URuntimeToolsFrameworkSubsystem::AddAllPropertySetKeepalives(UInteractiveTool* Tool) {
+void UToolsSubsystem::AddAllPropertySetKeepalives(UInteractiveTool* Tool) {
     TArray<UObject*> PropertySets = Tool->GetToolProperties(false);
     for (UObject* PropSetObj : PropertySets) {
         if (UInteractiveToolPropertySet* PropertySet = Cast<UInteractiveToolPropertySet>(PropSetObj)) {
@@ -663,7 +646,7 @@ void URuntimeToolsFrameworkSubsystem::AddAllPropertySetKeepalives(UInteractiveTo
 }
 
 
-void URuntimeToolsFrameworkSubsystem::AddPropertySetKeepalive(UInteractiveToolPropertySet* PropertySet) {
+void UToolsSubsystem::AddPropertySetKeepalive(UInteractiveToolPropertySet* PropertySet) {
     if (ensure(PropertySet != nullptr)) {
         bool bCached = false;
 

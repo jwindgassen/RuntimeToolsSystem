@@ -1,6 +1,4 @@
-
-#include "Interaction/SceneObjectSelectionInteraction.h"
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
+#include "Interaction/SelectionManager.h"
 
 
 void USceneObjectSelectionInteraction::Initialize(TUniqueFunction<bool()> CanChangeSelectionCallbackIn) {

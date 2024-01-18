@@ -1,14 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
-#include "GameFramework/GameModeBase.h"
+#include "MeshSceneSubsystem.h"
+#include "MaterialDomain.h"
+#include "Interaction/SceneObject.h"
 #include "Materials/Material.h"
 
-#define LOCTEXT_NAMESPACE "URuntimeMeshSceneSubsystem"
 
-URuntimeMeshSceneSubsystem* URuntimeMeshSceneSubsystem::InstanceSingleton = nullptr;
+#define LOCTEXT_NAMESPACE "UMeshSceneSubsystem"
 
-void URuntimeMeshSceneSubsystem::InitializeSingleton(URuntimeMeshSceneSubsystem* Subsystem) {
+
+UMeshSceneSubsystem* UMeshSceneSubsystem::InstanceSingleton = nullptr;
+
+
+void UMeshSceneSubsystem::InitializeSingleton(UMeshSceneSubsystem* Subsystem) {
     check(InstanceSingleton == nullptr);
     InstanceSingleton = Subsystem;
 
@@ -32,23 +34,23 @@ void URuntimeMeshSceneSubsystem::InitializeSingleton(URuntimeMeshSceneSubsystem*
 }
 
 
-URuntimeMeshSceneSubsystem* URuntimeMeshSceneSubsystem::Get() {
+UMeshSceneSubsystem* UMeshSceneSubsystem::Get() {
     return InstanceSingleton;
 }
 
 
-void URuntimeMeshSceneSubsystem::Deinitialize() {
+void UMeshSceneSubsystem::Deinitialize() {
     InstanceSingleton = nullptr;
 }
 
 
-void URuntimeMeshSceneSubsystem::SetCurrentTransactionsAPI(IToolsContextTransactionsAPI* TransactionsAPIIn) {
+void UMeshSceneSubsystem::SetCurrentTransactionsAPI(IToolsContextTransactionsAPI* TransactionsAPIIn) {
     TransactionsAPI = TransactionsAPIIn;
 }
 
 
-URuntimeMeshSceneObject* URuntimeMeshSceneSubsystem::CreateNewSceneObject() {
-    URuntimeMeshSceneObject* SceneObject = NewObject<URuntimeMeshSceneObject>(this);
+USceneObject* UMeshSceneSubsystem::CreateNewSceneObject() {
+    USceneObject* SceneObject = NewObject<USceneObject>(this);
     AddSceneObjectInternal(SceneObject, false);
 
     if (TransactionsAPI) {
@@ -65,8 +67,8 @@ URuntimeMeshSceneObject* URuntimeMeshSceneSubsystem::CreateNewSceneObject() {
 }
 
 
-URuntimeMeshSceneObject* URuntimeMeshSceneSubsystem::FindSceneObjectByActor(AActor* Actor) {
-    for (URuntimeMeshSceneObject* SceneObject : SceneObjects) {
+USceneObject* UMeshSceneSubsystem::FindSceneObjectByActor(AActor* Actor) {
+    for (USceneObject* SceneObject : SceneObjects) {
         if (SceneObject->GetActor() == Actor) {
             return SceneObject;
         }
@@ -75,7 +77,7 @@ URuntimeMeshSceneObject* URuntimeMeshSceneSubsystem::FindSceneObjectByActor(AAct
 }
 
 
-bool URuntimeMeshSceneSubsystem::DeleteSceneObject(URuntimeMeshSceneObject* SceneObject) {
+bool UMeshSceneSubsystem::DeleteSceneObject(USceneObject* SceneObject) {
     if (SceneObjects.Contains(SceneObject)) {
         if (SelectedSceneObjects.Contains(SceneObject)) {
             BeginSelectionChange();
@@ -100,17 +102,17 @@ bool URuntimeMeshSceneSubsystem::DeleteSceneObject(URuntimeMeshSceneObject* Scen
     }
     UE_LOG(
         LogTemp, Warning,
-        TEXT("[URuntimeMeshSceneSubsystem::DeleteSceneObject] Tried to delete non-existant SceneObject")
+        TEXT("[UMeshSceneSubsystem::DeleteSceneObject] Tried to delete non-existant SceneObject")
     );
     return false;
 }
 
 
-bool URuntimeMeshSceneSubsystem::DeleteSelectedSceneObjects() {
+bool UMeshSceneSubsystem::DeleteSelectedSceneObjects() {
     return DeleteSelectedSceneObjects(nullptr);
 }
 
-bool URuntimeMeshSceneSubsystem::DeleteSelectedSceneObjects(AActor* SkipActor) {
+bool UMeshSceneSubsystem::DeleteSelectedSceneObjects(AActor* SkipActor) {
     if (SelectedSceneObjects.Num() == 0) {
         return false;
     }
@@ -119,13 +121,13 @@ bool URuntimeMeshSceneSubsystem::DeleteSelectedSceneObjects(AActor* SkipActor) {
         TransactionsAPI->BeginUndoTransaction(LOCTEXT("DeleteSelectedObjectsChange", "Delete Objects"));
     }
 
-    TArray<URuntimeMeshSceneObject*> DeleteObjects = SelectedSceneObjects;
+    TArray<USceneObject*> DeleteObjects = SelectedSceneObjects;
 
     BeginSelectionChange();
     SelectedSceneObjects.Reset();
     EndSelectionChange();
 
-    for (URuntimeMeshSceneObject* SceneObject : DeleteObjects) {
+    for (USceneObject* SceneObject : DeleteObjects) {
         if (SceneObject->GetActor() == SkipActor) {
             continue;
         }
@@ -153,11 +155,11 @@ bool URuntimeMeshSceneSubsystem::DeleteSelectedSceneObjects(AActor* SkipActor) {
 
 
 
-void URuntimeMeshSceneSubsystem::ClearSelection() {
+void UMeshSceneSubsystem::ClearSelection() {
     if (SelectedSceneObjects.Num() > 0) {
         BeginSelectionChange();
 
-        for (URuntimeMeshSceneObject* SO : SelectedSceneObjects) {
+        for (USceneObject* SO : SelectedSceneObjects) {
             SO->ClearHighlightMaterial();
         }
         SelectedSceneObjects.Reset();
@@ -168,8 +170,8 @@ void URuntimeMeshSceneSubsystem::ClearSelection() {
 }
 
 
-void URuntimeMeshSceneSubsystem::SetSelected(
-    URuntimeMeshSceneObject* SceneObject, bool bDeselect, bool bDeselectOthers
+void UMeshSceneSubsystem::SetSelected(
+    USceneObject* SceneObject, bool bDeselect, bool bDeselectOthers
 ) {
     if (bDeselect) {
         if (SelectedSceneObjects.Contains(SceneObject)) {
@@ -184,7 +186,7 @@ void URuntimeMeshSceneSubsystem::SetSelected(
 
         bool bIsSelected = SelectedSceneObjects.Contains(SceneObject);
         if (bDeselectOthers) {
-            for (URuntimeMeshSceneObject* SO : SelectedSceneObjects) {
+            for (USceneObject* SO : SelectedSceneObjects) {
                 if (SO != SceneObject) {
                     SO->ClearHighlightMaterial();
                 }
@@ -202,7 +204,7 @@ void URuntimeMeshSceneSubsystem::SetSelected(
 }
 
 
-void URuntimeMeshSceneSubsystem::ToggleSelected(URuntimeMeshSceneObject* SceneObject) {
+void UMeshSceneSubsystem::ToggleSelected(USceneObject* SceneObject) {
     BeginSelectionChange();
 
     if (SelectedSceneObjects.Contains(SceneObject)) {
@@ -218,20 +220,20 @@ void URuntimeMeshSceneSubsystem::ToggleSelected(URuntimeMeshSceneObject* SceneOb
 }
 
 
-void URuntimeMeshSceneSubsystem::SetSelection(const TArray<URuntimeMeshSceneObject*>& NewSceneObjects) {
+void UMeshSceneSubsystem::SetSelection(const TArray<USceneObject*>& NewSceneObjects) {
     BeginSelectionChange();
     SetSelectionInternal(NewSceneObjects);
     EndSelectionChange();
 }
-void URuntimeMeshSceneSubsystem::SetSelectionInternal(const TArray<URuntimeMeshSceneObject*>& NewSceneObjects) {
+void UMeshSceneSubsystem::SetSelectionInternal(const TArray<USceneObject*>& NewSceneObjects) {
     if (SelectedSceneObjects.Num() > 0) {
-        for (URuntimeMeshSceneObject* SO : SelectedSceneObjects) {
+        for (USceneObject* SO : SelectedSceneObjects) {
             SO->ClearHighlightMaterial();
         }
         SelectedSceneObjects.Reset();
     }
 
-    for (URuntimeMeshSceneObject* SO : NewSceneObjects) {
+    for (USceneObject* SO : NewSceneObjects) {
         if (SceneObjects.Contains(SO)) {
             if (SelectedSceneObjects.Contains(SO) == false) {
                 SelectedSceneObjects.Add(SO);
@@ -240,7 +242,7 @@ void URuntimeMeshSceneSubsystem::SetSelectionInternal(const TArray<URuntimeMeshS
         } else {
             UE_LOG(
                 LogTemp, Warning,
-                TEXT("[URuntimeMeshSceneSubsystem::SetSelectionInternal] Tried to select non-existant SceneObject")
+                TEXT("[UMeshSceneSubsystem::SetSelectionInternal] Tried to select non-existant SceneObject")
             );
         }
     }
@@ -250,14 +252,14 @@ void URuntimeMeshSceneSubsystem::SetSelectionInternal(const TArray<URuntimeMeshS
 
 
 
-URuntimeMeshSceneObject* URuntimeMeshSceneSubsystem::FindNearestHitObject(
+USceneObject* UMeshSceneSubsystem::FindNearestHitObject(
     FVector RayOrigin, FVector RayDirection, FVector& WorldHitPoint, float& HitDistance, int& NearestTriangle,
     FVector& TriBaryCoords, float MaxDistance
 ) {
-    URuntimeMeshSceneObject* FoundHit = nullptr;
+    USceneObject* FoundHit = nullptr;
     float MinHitDistance = TNumericLimits<float>::Max();
 
-    for (URuntimeMeshSceneObject* SO : SceneObjects) {
+    for (USceneObject* SO : SceneObjects) {
         FVector HitPoint, BaryCoords;
         float HitDist;
         int32 NearestTri;
@@ -277,14 +279,14 @@ URuntimeMeshSceneObject* URuntimeMeshSceneSubsystem::FindNearestHitObject(
 
 
 
-void URuntimeMeshSceneSubsystem::BeginSelectionChange() {
+void UMeshSceneSubsystem::BeginSelectionChange() {
     check(!ActiveSelectionChange);
 
     ActiveSelectionChange = MakeUnique<FMeshSceneSelectionChange>();
     ActiveSelectionChange->OldSelection = SelectedSceneObjects;
 }
 
-void URuntimeMeshSceneSubsystem::EndSelectionChange() {
+void UMeshSceneSubsystem::EndSelectionChange() {
     check(ActiveSelectionChange);
     if (SelectedSceneObjects != ActiveSelectionChange->OldSelection) {
         ActiveSelectionChange->NewSelection = SelectedSceneObjects;
@@ -300,19 +302,19 @@ void URuntimeMeshSceneSubsystem::EndSelectionChange() {
 }
 
 void FMeshSceneSelectionChange::Apply(UObject* Object) {
-    if (URuntimeMeshSceneSubsystem* Subsystem = Cast<URuntimeMeshSceneSubsystem>(Object)) {
+    if (UMeshSceneSubsystem* Subsystem = Cast<UMeshSceneSubsystem>(Object)) {
         Subsystem->SetSelectionInternal(NewSelection);
     }
 }
 void FMeshSceneSelectionChange::Revert(UObject* Object) {
-    if (URuntimeMeshSceneSubsystem* Subsystem = Cast<URuntimeMeshSceneSubsystem>(Object)) {
+    if (UMeshSceneSubsystem* Subsystem = Cast<UMeshSceneSubsystem>(Object)) {
         Subsystem->SetSelectionInternal(OldSelection);
     }
 }
 
 
 
-void URuntimeMeshSceneSubsystem::AddSceneObjectInternal(URuntimeMeshSceneObject* Object, bool bIsUndoRedo) {
+void UMeshSceneSubsystem::AddSceneObjectInternal(USceneObject* Object, bool bIsUndoRedo) {
     SceneObjects.Add(Object);
 
     if (bIsUndoRedo) {
@@ -320,7 +322,7 @@ void URuntimeMeshSceneSubsystem::AddSceneObjectInternal(URuntimeMeshSceneObject*
     }
 }
 
-void URuntimeMeshSceneSubsystem::RemoveSceneObjectInternal(URuntimeMeshSceneObject* Object, bool bIsUndoRedo) {
+void UMeshSceneSubsystem::RemoveSceneObjectInternal(USceneObject* Object, bool bIsUndoRedo) {
     check(SceneObjects.Contains(Object));
     SceneObjects.Remove(Object);
 
@@ -331,17 +333,17 @@ void URuntimeMeshSceneSubsystem::RemoveSceneObjectInternal(URuntimeMeshSceneObje
 
 void FAddRemoveSceneObjectChange::Apply(UObject* Object) {
     if (bAdded) {
-        URuntimeMeshSceneSubsystem::Get()->AddSceneObjectInternal(SceneObject, true);
+        UMeshSceneSubsystem::Get()->AddSceneObjectInternal(SceneObject, true);
     } else {
-        URuntimeMeshSceneSubsystem::Get()->RemoveSceneObjectInternal(SceneObject, true);
+        UMeshSceneSubsystem::Get()->RemoveSceneObjectInternal(SceneObject, true);
     }
 }
 
 void FAddRemoveSceneObjectChange::Revert(UObject* Object) {
     if (bAdded) {
-        URuntimeMeshSceneSubsystem::Get()->RemoveSceneObjectInternal(SceneObject, true);
+        UMeshSceneSubsystem::Get()->RemoveSceneObjectInternal(SceneObject, true);
     } else {
-        URuntimeMeshSceneSubsystem::Get()->AddSceneObjectInternal(SceneObject, true);
+        UMeshSceneSubsystem::Get()->AddSceneObjectInternal(SceneObject, true);
     }
 }
 

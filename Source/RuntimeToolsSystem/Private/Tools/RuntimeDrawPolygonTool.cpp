@@ -1,6 +1,5 @@
 #include "Tools/RuntimeDrawPolygonTool.h"
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
+#include "MeshSceneSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "URuntimeDrawPolygonTool"
 
@@ -16,7 +15,7 @@ void URuntimeDrawPolygonTool::Setup() {
     UDrawPolygonTool::Setup();
 
     // initialize to drawing material
-    this->MaterialProperties->Material = URuntimeMeshSceneSubsystem::Get()->StandardMaterial;
+    this->MaterialProperties->Material = UMeshSceneSubsystem::Get()->StandardMaterial;
 
     // mirror properties we want to expose at runtime
     RuntimeProperties = NewObject<URuntimeDrawPolygonToolProperties>(this);

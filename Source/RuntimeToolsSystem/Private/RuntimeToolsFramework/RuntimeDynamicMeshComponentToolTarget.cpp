@@ -1,12 +1,11 @@
 #include "RuntimeToolsFramework/RuntimeDynamicMeshComponentToolTarget.h"
-
 #include "Components/DynamicMeshComponent.h"
 #include "DynamicMeshToMeshDescription.h"
 #include "MeshDescriptionToDynamicMesh.h"
 #include "StaticMeshAttributes.h"
 #include "Materials/Material.h"
 #include "ModelingToolTargetUtil.h"
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"  // to emit change transaction
+#include "ToolsSubsystem.h"
 
 
 #define LOCTEXT_NAMESPACE "URuntimeDynamicMeshComponentToolTarget"
@@ -152,7 +151,7 @@ UDynamicMeshComponent* URuntimeDynamicMeshComponentToolTarget::GetDynamicMeshCom
 void URuntimeDynamicMeshComponentToolTarget::CommitDynamicMeshChange(
     TUniquePtr<FToolCommandChange> Change, const FText& ChangeMessage
 ) {
-    URuntimeToolsFrameworkSubsystem::Get()->GetTransactionsAPI()->AppendChange(
+    UToolsSubsystem::Get()->GetTransactionsAPI()->AppendChange(
         Component.Get(), MoveTemp(Change), LOCTEXT("UpdateMeshChange", "Update Mesh")
     );
 

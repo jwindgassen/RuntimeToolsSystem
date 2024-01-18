@@ -1,35 +1,33 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/MeshComponent.h"
 #include "DynamicMesh/DynamicMesh3.h"
 #include "DynamicMesh/DynamicMeshAABBTree3.h"
-#include "RuntimeMeshSceneObject.generated.h"
+#include "SceneObject.generated.h"
 
 struct FMeshDescription;
 
 /**
- * URuntimeMeshSceneObject is a "Scene Object" in the "Scene". Do not create these yourself.
- * Use the functions in URuntimeMeshSceneSubsystem to create and manage SceneObjects.
+ * USceneObject is a "Scene Object" in the "Scene". Do not create these yourself.
+ * Use the functions in UInteractionComponent to create and manage SceneObjects.
  *
- * Conceptually, URuntimeMeshSceneObject is a triangle mesh object that can be selected,
+ * Conceptually, USceneObject is a triangle mesh object that can be selected,
  * transformed, and edited using mesh editing tools.
  *
- * Under the hood, URuntimeMeshSceneObject will spawn a ADynamicSDMCActor to actually implement
+ * Under the hood, USceneObject will spawn a ADynamicSDMCActor to actually implement
  * most of that functionality. But, the premise is that the higher level Scene is not aware
  * of those details.
  */
 UCLASS()
-class RUNTIMETOOLSSYSTEM_API URuntimeMeshSceneObject : public UObject {
+class RUNTIMETOOLSSYSTEM_API USceneObject : public UObject {
     using FDynamicMesh3 = UE::Geometry::FDynamicMesh3;
     using FDynamicMeshAABBTree3 = UE::Geometry::FDynamicMeshAABBTree3;
 
     GENERATED_BODY()
 
 public:
-    URuntimeMeshSceneObject();
+    USceneObject();
 
     void Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription);
     void Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh);
@@ -71,9 +69,7 @@ public:
         FVector& TriBaryCoords, float MaxDistance = 0
     );
 
-
-protected:
-    // URuntimeMeshSceneObject's representation in UE Level is a AActor
+    // USceneObject's representation in UE Level is a AActor
     UPROPERTY()
     AActor* Actor = nullptr;
 

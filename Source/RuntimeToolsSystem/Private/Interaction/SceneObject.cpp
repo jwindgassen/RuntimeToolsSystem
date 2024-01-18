@@ -1,17 +1,13 @@
-
-#include "MeshScene/RuntimeMeshSceneObject.h"
-
+#include "Interaction/SceneObject.h"
 #include "DynamicMesh/DynamicMesh3.h"
 #include "DynamicMesh/DynamicMeshAABBTree3.h"
 #include "MeshDescriptionToDynamicMesh.h"
-#include "DynamicMeshToMeshDescription.h"
 #include "MaterialDomain.h"
-
 #include "Materials/Material.h"
 
 using namespace UE::Geometry;
 
-URuntimeMeshSceneObject::URuntimeMeshSceneObject() {
+USceneObject::USceneObject() {
     if (!SourceMesh) {
         SourceMesh = MakeUnique<FDynamicMesh3>();
     }
@@ -24,7 +20,7 @@ URuntimeMeshSceneObject::URuntimeMeshSceneObject() {
 }
 
 
-void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription) {
+void USceneObject::Initialize(UWorld* TargetWorld, const FMeshDescription* InitialMeshDescription) {
     FActorSpawnParameters SpawnInfo;
     Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
 
@@ -32,7 +28,7 @@ void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FMeshDescrip
     UpdateComponentMaterials(false);
 }
 
-void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh) {
+void USceneObject::Initialize(UWorld* TargetWorld, const FDynamicMesh3* InitialMesh) {
     FActorSpawnParameters SpawnInfo;
     Actor = TargetWorld->SpawnActor<AActor>(FVector::ZeroVector, FRotator(0, 0, 0), SpawnInfo);
 
@@ -43,22 +39,22 @@ void URuntimeMeshSceneObject::Initialize(UWorld* TargetWorld, const FDynamicMesh
 }
 
 
-void URuntimeMeshSceneObject::SetTransform(FTransform Transform) {
+void USceneObject::SetTransform(FTransform Transform) {
     GetActor()->SetActorTransform(Transform);
 }
 
 
-AActor* URuntimeMeshSceneObject::GetActor() {
+AActor* USceneObject::GetActor() {
     return Actor;
 }
 
-UMeshComponent* URuntimeMeshSceneObject::GetMeshComponent() {
+UMeshComponent* USceneObject::GetMeshComponent() {
     return Actor->FindComponentByClass<UMeshComponent>();
 }
 
 
 
-void URuntimeMeshSceneObject::CopyMaterialsFromComponent() {
+void USceneObject::CopyMaterialsFromComponent() {
     UMeshComponent* Component = GetMeshComponent();
     int32 NumMaterials = Component->GetNumMaterials();
     if (NumMaterials == 0) {
@@ -72,7 +68,7 @@ void URuntimeMeshSceneObject::CopyMaterialsFromComponent() {
 }
 
 
-void URuntimeMeshSceneObject::SetAllMaterials(UMaterialInterface* SetToMaterial) {
+void USceneObject::SetAllMaterials(UMaterialInterface* SetToMaterial) {
     int32 NumMaterials = Materials.Num();
     for (int32 k = 0; k < NumMaterials; ++k) {
         Materials[k] = SetToMaterial;
@@ -81,7 +77,7 @@ void URuntimeMeshSceneObject::SetAllMaterials(UMaterialInterface* SetToMaterial)
 }
 
 
-void URuntimeMeshSceneObject::SetToHighlightMaterial(UMaterialInterface* Material) {
+void USceneObject::SetToHighlightMaterial(UMaterialInterface* Material) {
     UMeshComponent* Component = GetMeshComponent();
     int32 NumMaterials = FMath::Max(1, Component->GetNumMaterials());
     for (int32 k = 0; k < NumMaterials; ++k) {
@@ -89,12 +85,12 @@ void URuntimeMeshSceneObject::SetToHighlightMaterial(UMaterialInterface* Materia
     }
 }
 
-void URuntimeMeshSceneObject::ClearHighlightMaterial() {
+void USceneObject::ClearHighlightMaterial() {
     UpdateComponentMaterials(true);
 }
 
 
-void URuntimeMeshSceneObject::UpdateComponentMaterials(bool bForceRefresh) {
+void USceneObject::UpdateComponentMaterials(bool bForceRefresh) {
     UMaterialInterface* DefaultMaterial = UMaterial::GetDefaultMaterial(MD_Surface);
 
     UMeshComponent* Component = GetMeshComponent();
@@ -111,7 +107,7 @@ void URuntimeMeshSceneObject::UpdateComponentMaterials(bool bForceRefresh) {
 
 
 
-void URuntimeMeshSceneObject::UpdateSourceMesh(const FMeshDescription* MeshDescriptionIn) {
+void USceneObject::UpdateSourceMesh(const FMeshDescription* MeshDescriptionIn) {
     FMeshDescriptionToDynamicMesh Converter;
     FDynamicMesh3 TmpMesh;
     Converter.Convert(MeshDescriptionIn, TmpMesh);
@@ -122,7 +118,7 @@ void URuntimeMeshSceneObject::UpdateSourceMesh(const FMeshDescription* MeshDescr
 
 
 
-bool URuntimeMeshSceneObject::IntersectRay(
+bool USceneObject::IntersectRay(
     FVector RayOrigin, FVector RayDirection, FVector& WorldHitPoint, float& HitDistance, int& NearestTriangle,
     FVector& TriBaryCoords, float MaxDistance
 ) {

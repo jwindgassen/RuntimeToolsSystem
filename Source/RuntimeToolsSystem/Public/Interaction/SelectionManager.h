@@ -3,7 +3,7 @@
 #include "BaseBehaviors/BehaviorTargetInterfaces.h"
 #include "BaseBehaviors/SingleClickBehavior.h"
 #include "InputBehaviorSet.h"
-#include "SceneObjectSelectionInteraction.generated.h"
+#include "SelectionManager.generated.h"
 
 
 /**

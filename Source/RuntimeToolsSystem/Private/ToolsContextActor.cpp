@@ -1,7 +1,8 @@
-#include "RuntimeToolsFramework/ToolsContextActor.h"
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
+#include "ToolsContextActor.h"
+#include "ToolsSubsystem.h"
 #include "InputCoreTypes.h"
+#include "MeshSceneSubsystem.h"
+#include "History/SceneHistoryManager.h"
 #include "GameFramework/PlayerInput.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
@@ -18,7 +19,7 @@ void AToolsContextActor::BeginPlay() {
     Super::BeginPlay();
 
     UGameInstance* GameInstance = GetGameInstance();
-    ToolsSystem = UGameInstance::GetSubsystem<URuntimeToolsFrameworkSubsystem>(GameInstance);
+    ToolsSystem = UGameInstance::GetSubsystem<UToolsSubsystem>(GameInstance);
     ToolsSystem->SetContextActor(this);
 }
 
@@ -280,7 +281,7 @@ void AToolsContextActor::OnRedo() {
 
 void AToolsContextActor::OnDelete() {
     if (ToolsSystem->HaveActiveTool() == false) {
-        URuntimeMeshSceneSubsystem::Get()->DeleteSelectedSceneObjects();
+        UMeshSceneSubsystem::Get()->DeleteSelectedSceneObjects();
     }
 }
 

@@ -1,8 +1,7 @@
-#include "Interaction/SceneObjectTransformInteraction.h"
+#include "Interaction/TransformManager.h"
 
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
-
+#include "MeshSceneSubsystem.h"
+#include "ToolsSubsystem.h"
 #include "BaseGizmos/CombinedTransformGizmo.h"
 #include "BaseGizmos/TransformProxy.h"
 #include "BaseGizmos/TransformGizmoUtil.h"
@@ -10,20 +9,20 @@
 void USceneObjectTransformInteraction::Initialize(TUniqueFunction<bool()> GizmoEnabledCallbackIn) {
     GizmoEnabledCallback = MoveTemp(GizmoEnabledCallbackIn);
 
-    SelectionChangedEventHandle = URuntimeMeshSceneSubsystem::Get()->OnSelectionModified.AddLambda(
-        [this](URuntimeMeshSceneSubsystem* SceneSubsystem) { UpdateGizmoTargets(SceneSubsystem->GetSelection()); }
+    SelectionChangedEventHandle = UMeshSceneSubsystem::Get()->OnSelectionModified.AddLambda(
+        [this](UMeshSceneSubsystem* SceneSubsystem) { UpdateGizmoTargets(SceneSubsystem->GetSelection()); }
     );
 }
 
 void USceneObjectTransformInteraction::Shutdown() {
     if (SelectionChangedEventHandle.IsValid()) {
-        if (URuntimeMeshSceneSubsystem::Get()) {
-            URuntimeMeshSceneSubsystem::Get()->OnSelectionModified.Remove(SelectionChangedEventHandle);
+        if (UMeshSceneSubsystem::Get()) {
+            UMeshSceneSubsystem::Get()->OnSelectionModified.Remove(SelectionChangedEventHandle);
         }
         SelectionChangedEventHandle = FDelegateHandle();
     }
 
-    TArray<URuntimeMeshSceneObject*> EmptySelection;
+    TArray<USceneObject*> EmptySelection;
     UpdateGizmoTargets(EmptySelection);
 }
 
@@ -43,14 +42,14 @@ void USceneObjectTransformInteraction::SetEnableNonUniformScaling(bool bEnable) 
 }
 
 void USceneObjectTransformInteraction::ForceUpdateGizmoState() {
-    if (URuntimeMeshSceneSubsystem::Get()) {
-        UpdateGizmoTargets(URuntimeMeshSceneSubsystem::Get()->GetSelection());
+    if (UMeshSceneSubsystem::Get()) {
+        UpdateGizmoTargets(UMeshSceneSubsystem::Get()->GetSelection());
     }
 }
 
 
-void USceneObjectTransformInteraction::UpdateGizmoTargets(const TArray<URuntimeMeshSceneObject*>& Selection) {
-    UInteractiveGizmoManager* GizmoManager = URuntimeToolsFrameworkSubsystem::Get()->ToolsContext->GizmoManager;
+void USceneObjectTransformInteraction::UpdateGizmoTargets(const TArray<USceneObject*>& Selection) {
+    UInteractiveGizmoManager* GizmoManager = UToolsSubsystem::Get()->ToolsContext->GizmoManager;
 
     // destroy existing gizmos if we have any
     if (TransformGizmo != nullptr) {
@@ -65,7 +64,7 @@ void USceneObjectTransformInteraction::UpdateGizmoTargets(const TArray<URuntimeM
     }
 
     TransformProxy = NewObject<UTransformProxy>(this);
-    for (URuntimeMeshSceneObject* SO : Selection) {
+    for (USceneObject* SO : Selection) {
         // would be nice if this worked on Actors...
         TransformProxy->AddComponent(SO->GetMeshComponent());
     }

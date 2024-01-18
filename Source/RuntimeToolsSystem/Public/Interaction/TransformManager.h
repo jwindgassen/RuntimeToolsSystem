@@ -1,18 +1,18 @@
 #pragma once
 
-#include "SceneObjectTransformInteraction.generated.h"
+#include "TransformManager.generated.h"
 
 class UTransformProxy;
 class UCombinedTransformGizmo;
-class URuntimeMeshSceneObject;
+class USceneObject;
 
 /**
  * USceneObjectTransformInteraction manages a 3D Translate/Rotate/Scale (TRS) Gizmo for the
- * current URuntimeMeshSceneObject selection set (stored in URuntimeMeshSceneSubsystem).
+ * current USceneObject selection set (stored in URuntimeMeshSceneSubsystem).
  *
  * Gizmo local/global frame is not controlled here, the Gizmo looks this information up itself
  * based on the EToolContextCoordinateSystem provided by the IToolsContextQueriesAPI implementation
- * in URuntimeToolsFrameworkSubsystem. You can configure the Gizmo to ignore this, in UpdateGizmoTargets()
+ * in UToolsSubsystem. You can configure the Gizmo to ignore this, in UpdateGizmoTargets()
  *
  * Behavior of the TRS Gizmo (ie pivot position, etc) is controlled by a standard UTransformProxy.
  * See UTransformMeshesTool for sample code for doing things like modifying pivot dynamically/etc.
@@ -49,7 +49,7 @@ protected:
     UPROPERTY()
     UCombinedTransformGizmo* TransformGizmo;
 
-    void UpdateGizmoTargets(const TArray<URuntimeMeshSceneObject*>& Selection);
+    void UpdateGizmoTargets(const TArray<USceneObject*>& Selection);
 
     bool bEnableScaling = true;
     bool bEnableNonUniformScaling = true;

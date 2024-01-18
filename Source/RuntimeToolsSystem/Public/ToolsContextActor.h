@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Engine.h"
 #include "CoreMinimal.h"
 #include "GameFramework/DefaultPawn.h"
 #include "ToolsContextActor.generated.h"
 
-class URuntimeToolsFrameworkSubsystem;
+
+class UToolsSubsystem;
+
 
 /**
  * Camera-control modes that AToolsContextActor has implemented
@@ -15,7 +16,7 @@ enum class EToolActorInteractionMode : uint8 { NoInteraction, RightMouseCameraCo
 
 /**
  * AToolsContextActor is the Pawn used in the AToolsFrameworkDemoGameModeBase.
- * This Game Mode initializes the URuntimeMeshSceneSubsystem and URuntimeToolsFrameworkSubsystem.
+ * This Game Mode initializes the URuntimeMeshSceneSubsystem and UToolsSubsystem.
  * Essentially, this Actor has two jobs:
  *
  * 1) to forward Input events (from the PlayerInputComponent) to these subsystems,
@@ -64,7 +65,7 @@ public:
 
 
 protected:
-    URuntimeToolsFrameworkSubsystem* ToolsSystem;
+    UToolsSubsystem* ToolsSystem;
 
     EToolActorInteractionMode CurrentInteractionMode = EToolActorInteractionMode::NoInteraction;
     bool bIsRightMouseDown = false;

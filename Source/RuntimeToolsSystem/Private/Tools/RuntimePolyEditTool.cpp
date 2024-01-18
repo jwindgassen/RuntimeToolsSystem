@@ -1,7 +1,6 @@
 #include "Tools/RuntimePolyEditTool.h"
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
+#include "ToolsSubsystem.h"
 
-#include "ToolBuilderUtil.h"
 
 #define LOCTEXT_NAMESPACE "URuntimeEditMeshPolygonsTool"
 

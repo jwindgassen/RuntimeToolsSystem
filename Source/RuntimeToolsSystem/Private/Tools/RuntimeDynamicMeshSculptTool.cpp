@@ -1,5 +1,5 @@
 #include "Tools/RuntimeDynamicMeshSculptTool.h"
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
+#include "ToolsSubsystem.h"
 
 #include "ToolBuilderUtil.h"
 

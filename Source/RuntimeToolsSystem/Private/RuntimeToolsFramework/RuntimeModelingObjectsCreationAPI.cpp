@@ -1,7 +1,8 @@
 #include "RuntimeToolsFramework/RuntimeModelingObjectsCreationAPI.h"
 #include "InteractiveToolsContext.h"
 #include "ContextObjectStore.h"
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
+#include "MeshSceneSubsystem.h"
+#include "Interaction/SceneObject.h"
 
 using namespace UE::Geometry;
 
@@ -36,7 +37,7 @@ FCreateMeshObjectResult URuntimeModelingObjectsCreationAPI::CreateMeshObject(
     const FCreateMeshObjectParams& CreateMeshParams
 ) {
     // create new SceneObject
-    URuntimeMeshSceneObject* SceneObject = URuntimeMeshSceneSubsystem::Get()->CreateNewSceneObject();
+    USceneObject* SceneObject = UMeshSceneSubsystem::Get()->CreateNewSceneObject();
 
     // initialize the mesh, depending on whether we were passed a FMeshDescription or a FDynamicMesh3
     if (CreateMeshParams.MeshType == ECreateMeshObjectSourceMeshType::MeshDescription) {

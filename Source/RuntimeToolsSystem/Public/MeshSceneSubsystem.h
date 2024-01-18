@@ -3,14 +3,14 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "InteractiveToolsContext.h"
-#include "RuntimeMeshSceneObject.h"
-#include "RuntimeMeshSceneSubsystem.generated.h"
+#include "MeshSceneSubsystem.generated.h"
 
 class FMeshSceneSelectionChange;
 class FAddRemoveSceneObjectChange;
+class USceneObject;
 
 /**
- * URuntimeMeshSceneSubsystem manages a "Scene" of "SceneObjects", currently only URuntimeMeshSceneObject (SO).
+ * UMeshSceneSubsystem manages a "Scene" of "SceneObjects", currently only USceneObject (SO).
  *
  * Use CreateNewSceneObject() to create a new SO, and the various Delete functions to remove them.
  * These changes will be undo-able, ie they will send Change events to the USceneHistoryManager instance.
@@ -20,15 +20,15 @@ class FAddRemoveSceneObjectChange;
  * Cast rays into the scene using FindNearestHitObject()
  */
 UCLASS()
-class RUNTIMETOOLSSYSTEM_API URuntimeMeshSceneSubsystem : public UGameInstanceSubsystem {
+class RUNTIMETOOLSSYSTEM_API UMeshSceneSubsystem : public UGameInstanceSubsystem {
     GENERATED_BODY()
 
 public:
-    static void InitializeSingleton(URuntimeMeshSceneSubsystem* Subsystem);
-    static URuntimeMeshSceneSubsystem* Get();
+    static void InitializeSingleton(UMeshSceneSubsystem* Subsystem);
+    static UMeshSceneSubsystem* Get();
 
 protected:
-    static URuntimeMeshSceneSubsystem* InstanceSingleton;
+    static UMeshSceneSubsystem* InstanceSingleton;
 
 public:
     virtual void Deinitialize() override;
@@ -49,13 +49,13 @@ public:
 
 public:
     UFUNCTION(BlueprintCallable)
-    URuntimeMeshSceneObject* CreateNewSceneObject();
+    USceneObject* CreateNewSceneObject();
 
     UFUNCTION(BlueprintCallable)
-    URuntimeMeshSceneObject* FindSceneObjectByActor(AActor* Actor);
+    USceneObject* FindSceneObjectByActor(AActor* Actor);
 
     UFUNCTION(BlueprintCallable)
-    bool DeleteSceneObject(URuntimeMeshSceneObject* Object);
+    bool DeleteSceneObject(USceneObject* Object);
 
     UFUNCTION(BlueprintCallable)
     bool DeleteSelectedSceneObjects();
@@ -64,32 +64,32 @@ public:
 
 
 public:
-    UFUNCTION(BlueprintCallable, Category = "URuntimeMeshSceneSubsystem")
-    TArray<URuntimeMeshSceneObject*> GetSelection() const {
+    UFUNCTION(BlueprintCallable, Category = "UMeshSceneSubsystem")
+    TArray<USceneObject*> GetSelection() const {
         return SelectedSceneObjects;
     }
 
-    UFUNCTION(BlueprintCallable, Category = "URuntimeMeshSceneSubsystem")
+    UFUNCTION(BlueprintCallable, Category = "UMeshSceneSubsystem")
     void ClearSelection();
 
-    UFUNCTION(BlueprintCallable, Category = "URuntimeMeshSceneSubsystem")
-    void SetSelected(URuntimeMeshSceneObject* SceneObject, bool bDeselect = false, bool bDeselectOthers = true);
+    UFUNCTION(BlueprintCallable, Category = "UMeshSceneSubsystem")
+    void SetSelected(USceneObject* SceneObject, bool bDeselect = false, bool bDeselectOthers = true);
 
-    UFUNCTION(BlueprintCallable, Category = "URuntimeMeshSceneSubsystem")
-    void ToggleSelected(URuntimeMeshSceneObject* SceneObject);
+    UFUNCTION(BlueprintCallable, Category = "UMeshSceneSubsystem")
+    void ToggleSelected(USceneObject* SceneObject);
 
-    UFUNCTION(BlueprintCallable, Category = "URuntimeMeshSceneSubsystem")
-    void SetSelection(const TArray<URuntimeMeshSceneObject*>& SceneObjects);
+    UFUNCTION(BlueprintCallable, Category = "UMeshSceneSubsystem")
+    void SetSelection(const TArray<USceneObject*>& SceneObjects);
 
 
-    DECLARE_MULTICAST_DELEGATE_OneParam(FMeshSceneSelectionChangedEvent, URuntimeMeshSceneSubsystem*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FMeshSceneSelectionChangedEvent, UMeshSceneSubsystem*);
     FMeshSceneSelectionChangedEvent OnSelectionModified;
 
 
 
 public:
-    UFUNCTION(BlueprintCallable, Category = "URuntimeMeshSceneSubsystem")
-    URuntimeMeshSceneObject* FindNearestHitObject(
+    UFUNCTION(BlueprintCallable, Category = "UMeshSceneSubsystem")
+    USceneObject* FindNearestHitObject(
         FVector RayOrigin, FVector RayDirection, FVector& WorldHitPoint, float& HitDistance, int& NearestTriangle,
         FVector& TriBaryCoords, float MaxDistance = 0
     );
@@ -99,15 +99,15 @@ protected:
     IToolsContextTransactionsAPI* TransactionsAPI = nullptr;
 
     UPROPERTY()
-    TArray<URuntimeMeshSceneObject*> SceneObjects;
+    TArray<USceneObject*> SceneObjects;
 
-    void AddSceneObjectInternal(URuntimeMeshSceneObject* Object, bool bIsUndoRedo);
-    void RemoveSceneObjectInternal(URuntimeMeshSceneObject* Object, bool bIsUndoRedo);
+    void AddSceneObjectInternal(USceneObject* Object, bool bIsUndoRedo);
+    void RemoveSceneObjectInternal(USceneObject* Object, bool bIsUndoRedo);
 
     UPROPERTY()
-    TArray<URuntimeMeshSceneObject*> SelectedSceneObjects;
+    TArray<USceneObject*> SelectedSceneObjects;
 
-    void SetSelectionInternal(const TArray<URuntimeMeshSceneObject*>& SceneObjects);
+    void SetSelectionInternal(const TArray<USceneObject*>& SceneObjects);
 
     TUniquePtr<FMeshSceneSelectionChange> ActiveSelectionChange;
     void BeginSelectionChange();
@@ -124,8 +124,8 @@ protected:
  */
 class RUNTIMETOOLSSYSTEM_API FMeshSceneSelectionChange : public FToolCommandChange {
 public:
-    TArray<URuntimeMeshSceneObject*> OldSelection;
-    TArray<URuntimeMeshSceneObject*> NewSelection;
+    TArray<USceneObject*> OldSelection;
+    TArray<USceneObject*> NewSelection;
 
     virtual void Apply(UObject* Object) override;
     virtual void Revert(UObject* Object) override;
@@ -138,7 +138,7 @@ public:
 
 class RUNTIMETOOLSSYSTEM_API FAddRemoveSceneObjectChange : public FToolCommandChange {
 public:
-    URuntimeMeshSceneObject* SceneObject;
+    USceneObject* SceneObject;
     bool bAdded = true;
 
 public:

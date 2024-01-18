@@ -1,8 +1,4 @@
-
-#pragma once
-
-#include "MeshScene/SceneHistoryManager.h"
-
+#include "History/SceneHistoryManager.h"
 
 
 bool FChangeHistoryTransaction::HasExpired() const {

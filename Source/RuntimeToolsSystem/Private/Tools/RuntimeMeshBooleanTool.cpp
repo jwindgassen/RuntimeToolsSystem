@@ -1,11 +1,7 @@
 #include "Tools/RuntimeMeshBooleanTool.h"
-#include "RuntimeToolsFramework/RuntimeToolsFrameworkSubsystem.h"
-#include "MeshScene/RuntimeMeshSceneSubsystem.h"
-
-#include "ToolBuilderUtil.h"
+#include "ToolsSubsystem.h"
+#include "MeshSceneSubsystem.h"
 #include "ModelingToolTargetUtil.h"
-#include "DynamicMesh/MeshTransforms.h"
-#include "DynamicMeshToMeshDescription.h"
 
 #define LOCTEXT_NAMESPACE "URuntimeMeshBooleanTool"
 
@@ -46,9 +42,9 @@ void URuntimeMeshBooleanTool::Shutdown(EToolShutdownType ShutdownType) {
 
         // base UCSGMeshesTool will delete the Actor but we need to also delete the SO...
         AActor* KeepActor = UE::ToolTarget::GetTargetActor(Targets[0]);
-        URuntimeMeshSceneObject* KeepSO = URuntimeMeshSceneSubsystem::Get()->FindSceneObjectByActor(KeepActor);
-        URuntimeMeshSceneSubsystem::Get()->SetSelected(KeepSO, true, false);
-        URuntimeMeshSceneSubsystem::Get()->DeleteSelectedSceneObjects(KeepActor);
+        USceneObject* KeepSO = UMeshSceneSubsystem::Get()->FindSceneObjectByActor(KeepActor);
+        UMeshSceneSubsystem::Get()->SetSelected(KeepSO, true, false);
+        UMeshSceneSubsystem::Get()->DeleteSelectedSceneObjects(KeepActor);
     }
 
     UCSGMeshesTool::Shutdown(ShutdownType);

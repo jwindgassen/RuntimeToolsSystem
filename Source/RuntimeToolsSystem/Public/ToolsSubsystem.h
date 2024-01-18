@@ -3,13 +3,10 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "InteractiveToolsContext.h"
-
 #include "ToolsContextRenderComponent.h"
-#include "MeshScene/SceneHistoryManager.h"
-#include "Interaction/SceneObjectSelectionInteraction.h"
-#include "Interaction/SceneObjectTransformInteraction.h"
-
-#include "RuntimeToolsFrameworkSubsystem.generated.h"
+#include "Interaction/SelectionManager.h"
+#include "Interaction/TransformManager.h"
+#include "ToolsSubsystem.generated.h"
 
 
 class FRuntimeToolsContextQueriesImpl;
@@ -22,7 +19,7 @@ class AToolsContextActor;
  *
  */
 UCLASS()
-class RUNTIMETOOLSSYSTEM_API URuntimeToolsFrameworkSubsystem : public UGameInstanceSubsystem {
+class RUNTIMETOOLSSYSTEM_API UToolsSubsystem : public UGameInstanceSubsystem {
     GENERATED_BODY()
 
     //
@@ -31,11 +28,11 @@ class RUNTIMETOOLSSYSTEM_API URuntimeToolsFrameworkSubsystem : public UGameInsta
     // Singleton)
     //
 public:
-    static void InitializeSingleton(URuntimeToolsFrameworkSubsystem* Subsystem);
-    static URuntimeToolsFrameworkSubsystem* Get();
+    static void InitializeSingleton(UToolsSubsystem* Subsystem);
+    static UToolsSubsystem* Get();
 
 protected:
-    static URuntimeToolsFrameworkSubsystem* InstanceSingleton;
+    static UToolsSubsystem* InstanceSingleton;
 
 
     //
@@ -122,14 +119,6 @@ public:
         return CurrentCoordinateSystem == EToolContextCoordinateSystem::World;
     }
 
-
-
-    //
-    // random utility BP functions
-    //
-
-    UFUNCTION(BlueprintCallable)
-    URuntimeMeshSceneObject* ImportMeshSceneObject(const FString Path, bool bFlipOrientation);
 
 
 
