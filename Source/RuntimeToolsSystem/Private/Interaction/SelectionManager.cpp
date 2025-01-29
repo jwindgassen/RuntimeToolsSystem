@@ -1,5 +1,7 @@
 #include "Interaction/SelectionManager.h"
 
+#include "MeshSceneSubsystem.h"
+
 
 void USceneObjectSelectionInteraction::Initialize(TUniqueFunction<bool()> CanChangeSelectionCallbackIn) {
     CanChangeSelectionCallback = MoveTemp(CanChangeSelectionCallbackIn);
@@ -35,7 +37,7 @@ FInputRayHit USceneObjectSelectionInteraction::IsHitByClick(const FInputDeviceRa
     FVector HitPoint, BaryCoords;
     float HitDist;
     int32 HitTri;
-    URuntimeMeshSceneObject* HitObject = URuntimeMeshSceneSubsystem::Get()->FindNearestHitObject(
+    USceneObject* HitObject = UMeshSceneSubsystem::Get()->FindNearestHitObject(
         ClickPos.WorldRay.Origin, ClickPos.WorldRay.Direction, HitPoint, HitDist, HitTri, BaryCoords
     );
 
@@ -59,19 +61,19 @@ void USceneObjectSelectionInteraction::OnClicked(const FInputDeviceRay& ClickPos
     FVector HitPoint, BaryCoords;
     float HitDist;
     int32 HitTri;
-    URuntimeMeshSceneObject* HitObject = URuntimeMeshSceneSubsystem::Get()->FindNearestHitObject(
+    USceneObject* HitObject = UMeshSceneSubsystem::Get()->FindNearestHitObject(
         ClickPos.WorldRay.Origin, ClickPos.WorldRay.Direction, HitPoint, HitDist, HitTri, BaryCoords
     );
 
     if (HitObject != nullptr) {
         if (bAddToSelectionEnabled) {
-            URuntimeMeshSceneSubsystem::Get()->SetSelected(HitObject, false, false);
+            UMeshSceneSubsystem::Get()->SetSelected(HitObject, false, false);
         } else if (bToggleSelectionEnabled) {
-            URuntimeMeshSceneSubsystem::Get()->ToggleSelected(HitObject);
+            UMeshSceneSubsystem::Get()->ToggleSelected(HitObject);
         } else {
-            URuntimeMeshSceneSubsystem::Get()->SetSelected(HitObject, false, true);
+            UMeshSceneSubsystem::Get()->SetSelected(HitObject, false, true);
         }
     } else {
-        URuntimeMeshSceneSubsystem::Get()->ClearSelection();
+        UMeshSceneSubsystem::Get()->ClearSelection();
     }
 }

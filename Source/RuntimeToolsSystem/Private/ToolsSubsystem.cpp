@@ -324,7 +324,7 @@ public:
 
 
 
-PRAGMA_DISABLE_OPTIMIZATION
+UE_DISABLE_OPTIMIZATION
 void UToolsSubsystem::Tick(float DeltaTime) {
     if (ensure(ContextActor) == false) {
         return;
@@ -458,7 +458,7 @@ void UToolsSubsystem::Tick(float DeltaTime) {
         FlushRenderingCommands();
     }
 }
-PRAGMA_ENABLE_OPTIMIZATION
+UE_ENABLE_OPTIMIZATION
 
 void UToolsSubsystem::SetContextActor(AToolsContextActor* ActorIn) {
     ContextActor = ActorIn;
